@@ -1,4 +1,5 @@
 import numpy as np
+from random import randint
 
 #                   U
 #              [41][42][43]
@@ -134,10 +135,13 @@ class Cube:
             faces[i][:, 2] = faces[i+1][:, 2]
         self.face_back = face
 
-    def random(self):
+    def random(self, nb_moves=randint(1, 40)):
         faces = ["F", "R", "U", "B", "L", "D"]
         extras = ["", "'", "2"]
-        return
+        pattern = ""
+        for i in range(nb_moves):
+            pattern = pattern + " " + faces[randint(0, 5)] + extras[randint(0, 2)]
+        return (pattern)
 
     def scramble(self, pattern: str):
         faces = {"F" : self.FRONT, "R": self.RIGHT, "U": self.UP, "B": self.BACK, "L": self.LEFT, "D": self.DOWN}
