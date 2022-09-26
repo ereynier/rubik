@@ -1,43 +1,42 @@
 import numpy as np
 from random import randint
 
-#                   U
-#              [41][42][43]
-#              [44][45][46]
-#              [47][48][49]
-#      L            F            R            B
-# [11][12][13] [31][32][33] [21][22][23] [61][62][63]                         <-┐ 
-# [14][15][16] [34][35][36] [24][25][26] [64][65][66]             rot90 1 ->    |
-# [17][18][19] [37][38][39] [27][28][29] [67][68][69]
-#                   D
-#              [51][52][53]
-#              [54][55][56]
-#              [57][58][59]
-
+#                      U
+#              [['U1' 'U2' 'U3']]
+#              [['U4' 'U5' 'U6']]
+#              [['U7' 'U8' 'U9']]
+#         L                  F                  R                  B
+# [['L1' 'L2' 'L3']] [['F1' 'F2' 'F3']] [['R1' 'R2' 'R3']] [['B1' 'B2' 'B3']]                              <-┐  
+# [['L4' 'L5' 'L6']] [['F4' 'F5' 'F6']] [['R4' 'R5' 'R6']] [['B4' 'B5' 'B6']]                  rot90 1 ->    |
+# [['L7' 'L8' 'L9']] [['F7' 'F8' 'F9']] [['R7' 'R8' 'R9']] [['B7' 'B8' 'B9']] 
+#                      D
+#              [['D1' 'D2' 'D3']]
+#              [['D4' 'D5' 'D6']]
+#              [['D7' 'D8' 'D9']]
 
 class Cube:
     def __init__(self):
         self.reset()
 
     def reset(self):
-        self.face_left = np.matrix([[11, 12, 13], [14, 15, 16], [17, 18, 19]])
-        self.face_right = np.matrix([[21, 22, 23], [24, 25, 26], [27, 28, 29]])
-        self.face_front = np.matrix([[31, 32, 33], [34, 35, 36], [37, 38, 39]])
-        self.face_up = np.matrix([[41, 42, 43], [44, 45, 46], [47, 48, 49]])
-        self.face_down = np.matrix([[51, 52, 53], [54, 55, 56], [57, 58, 59]])
-        self.face_back = np.matrix([[61, 62, 63], [64, 65, 66], [67, 68, 69]])
+        self.face_left = np.matrix([["L1", "L2", "L3"], ["L4", "L5", "L6"], ["L7", "L8", "L9"]])
+        self.face_right = np.matrix([["R1", "R2", "R3"], ["R4", "R5", "R6"], ["R7", "R8", "R9"]])
+        self.face_front = np.matrix([["F1", "F2", "F3"], ["F4", "F5", "F6"], ["F7", "F8", "F9"]])
+        self.face_up = np.matrix([["U1", "U2", "U3"], ["U4", "U5", "U6"], ["U7", "U8", "U9"]])
+        self.face_down = np.matrix([["D1", "D2", "D3"], ["D4", "D5", "D6"], ["D7", "D8", "D9"]])
+        self.face_back = np.matrix([["B1", "B2", "B3"], ["B4", "B5", "B6"], ["B7", "B8", "B9"]])
 
     def printCube(self):
         a = f"""
-                          U
+                             U
                      {self.face_up[0]}
                      {self.face_up[1]}
                      {self.face_up[2]}
-             L            F            R            B
+                L                  F                  R                  B
         {self.face_left[0]} {self.face_front[0]} {self.face_right[0]} {self.face_back[0]}
         {self.face_left[1]} {self.face_front[1]} {self.face_right[1]} {self.face_back[1]}
         {self.face_left[2]} {self.face_front[2]} {self.face_right[2]} {self.face_back[2]}
-                          D
+                             D
                      {self.face_down[0]}
                      {self.face_down[1]}
                      {self.face_down[2]}

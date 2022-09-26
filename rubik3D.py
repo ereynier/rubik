@@ -1,3 +1,4 @@
+from time import sleep
 from ursina import *
 
 
@@ -15,6 +16,10 @@ class Game(Ursina):
         camera.world_position = (0, 0, -15)
         self.model, self.texture = 'models/custom_cube', "textures/rubik_texture"
         self.load_game()
+        self.scramble = ""
+        self.solver = ""
+        self.game_mode = "game"
+        self.next = []
 
     def load_game(self):
         self.create_cube_positions()
@@ -26,14 +31,24 @@ class Game(Ursina):
         self.animation_time = 0.5
         self.action_trigger = True
 
+    def setScramble(self, s):
+        self.scramble = s.split()
+
+    def setSolver(self, s):
+        self.solver = s.split()
+
     def toggle_animation_trigger(self):
         self.action_trigger = not self.action_trigger
+        if len(self.next) > 0:
+            self.nextMove(self.next)
+        
 
-    def rotate_side(self, side_name):
+    def rotate_side(self, side_name, prime=1):
         self.action_trigger = False
         cube_positions = self.cubes_side_positions[side_name]
         rotation_axis = self.rotation_axes[side_name]
         rotation_dir = self.rotation_dir[side_name]
+        rotation_dir = rotation_dir * prime
         self.reparent_to_scene()
         for cube in self.CUBES:
             if cube.position in cube_positions:
@@ -58,13 +73,45 @@ class Game(Ursina):
         self.UP = {Vec3(x, 1, z) for x in range (-1,2) for z in range(-1, 2)}
         self.SIDE_POSITIONS = self.LEFT | self.DOWN | self.FRONT | self.BACK | self.RIGHT |self.UP
 
+    def nextMove(self, pattern):
+        faces = dict(zip('FRUBLD', 'FRONT RIGHT UP BACK LEFT DOWN'.split()))
+        move = pattern[0]
+        if len(move) > 2 or not move[0] in faces or (len(move) == 2 and (move[1] != "2" and move[1] != "'")):
+            print(f"{move} not existing")
+            return
+        else:
+            if len(move) == 2:
+                if move[1] == "'":
+                    self.rotate_side(faces[move[0]], -1)
+                elif move[1] == "2":
+                    self.rotate_side(faces[move[0]], 2)
+            else:
+                self.rotate_side(faces[move[0]])
+        self.next = pattern[1:]
+        
+
     def input(self, key):
-        keys = dict(zip('frubld', 'FRONT RIGHT UP BACK LEFT DOWN'.split()))
-        if key in keys and self.action_trigger:
-            self.rotate_side(keys[key])
-        if key == 'space':
-            print(camera.world_position)
-            print(camera.world_rotation)
+        if self.game_mode == "game":
+            keys = dict(zip('frubld', 'FRONT RIGHT UP BACK LEFT DOWN'.split()))
+            if key in keys and self.action_trigger:
+                self.rotate_side(keys[key])
+                
+        elif self.game_mode == "solver":
+            if key == 's' and len(self.next) == 0 and self.action_trigger:
+                self.nextMove(self.scramble)
+
+        if key == "+":
+            if self.animation_time - 0.1 >= 0:
+                self.animation_time = round(self.animation_time - 0.1, 2)
+            speed = Text(text=str(self.animation_time), origin=(20, -12))
+            speed.appear(speed=0.025)
+            speed.fade_out(duration=0.3)
+        if key == "-":
+            if self.animation_time + 0.1 <= 2:
+                self.animation_time = round(self.animation_time + 0.1, 2)
+            speed = Text(text=str(self.animation_time), origin=(20, -12))
+            speed.appear(speed=0.025)
+            speed.fade_out(duration=0.3)
         super().input(key)
 
 
