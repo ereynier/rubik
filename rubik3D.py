@@ -99,6 +99,8 @@ class Game(Ursina):
         elif self.game_mode == "solver":
             if key == 's' and len(self.next) == 0 and self.action_trigger:
                 self.nextMove(self.scramble)
+            if key == 'r' and len(self.next) == 0 and self.action_trigger:
+                self.nextMove(self.solver)
 
         if key == "+":
             if self.animation_time - 0.1 >= 0:
@@ -107,11 +109,14 @@ class Game(Ursina):
             speed.appear(speed=0.025)
             speed.fade_out(duration=0.3)
         if key == "-":
-            if self.animation_time + 0.1 <= 2:
+            if self.animation_time + 0.1 <= 5:
                 self.animation_time = round(self.animation_time + 0.1, 2)
             speed = Text(text=str(self.animation_time), origin=(20, -12))
             speed.appear(speed=0.025)
             speed.fade_out(duration=0.3)
+
+        if key == "escape":
+            quit()
         super().input(key)
 
 

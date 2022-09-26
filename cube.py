@@ -160,4 +160,7 @@ class Cube:
                     faces[move[0]]()
         return
 
+
+    def solver():
+        pass
     
