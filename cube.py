@@ -134,6 +134,24 @@ class Cube:
             faces[i][:, 2] = faces[i+1][:, 2]
         self.face_back = face
 
+    def reverseScramble(self, pattern):
+        faces = ["F", "R", "U", "B", "L", "D"]
+        moves = pattern.split()
+        reversed = []
+        l = len(moves)
+        for i in range(l):
+            move = moves[l - 1 - i]
+            if len(move) > 2 or not move[0] in faces or (len(move) == 2 and (move[1] != "2" and move[1] != "'")):
+                print(f"{move} not existing")
+                return
+            if len(move) == 1:
+                move = move + "'"
+            elif len(move) == 2 and move[1] == "'":
+                move = move[0]
+            reversed.append(move)
+        return(" ".join(reversed))
+
+
     def random(self, nb_moves=randint(1, 40)):
         faces = ["F", "R", "U", "B", "L", "D"]
         extras = ["", "'", "2"]

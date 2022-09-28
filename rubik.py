@@ -7,9 +7,9 @@ import sys
 
 def main():
     cube = Cube()
-    pattern = "F2 D2 R' F2 R D2 F2 R2 U' F D R2 B2 L' F' R D' U2 F R2"
+    pattern = cube.random()
     cube.scramble(pattern)
-    solved = " ".join("F2 D2 R F2 R' D2 F2 R2 U F' D' R2 B2 L F R' D U2 F' R2".split()[::-1])
+    solved = cube.reverseScramble(pattern)
     cube.printCube()
 
     if len(sys.argv) > 1:
