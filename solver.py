@@ -106,11 +106,12 @@ def solver(cube):
     while sum(bad_edges.values()) > 0:
         cube = edgeOrienting(cube ,bad_edges)
         bad_edges = eoDetection(cube)
+    print(pattern)
 
 def main():
     cube = Cube()
-    pattern = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
-    cube.scramble(pattern)
+    scramble = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
+    cube.scramble(scramble)
     cube.printCube()
     solver(cube)
     return
