@@ -1,13 +1,13 @@
 from ast import pattern
 from time import sleep
 from cube import Cube
-import solver
+#import solver
 from rubik3D import Game
 import sys
 
 def main():
     cube = Cube()
-    pattern = cube.random()
+    pattern = "D' B U2 L2 D2 B2 R' B F R D F' U' D F D2 F2 L' B L R2 D2 F2 D2 U"
     cube.scramble(pattern)
     solved = cube.reverseScramble(pattern)
     cube.printCube()

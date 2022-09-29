@@ -95,6 +95,9 @@ class Game(Ursina):
             keys = dict(zip('frubld', 'FRONT RIGHT UP BACK LEFT DOWN'.split()))
             if key in keys and self.action_trigger:
                 self.rotate_side(keys[key])
+            if key.split("-")[0] == "shift" and len(key.split("-")) == 2 and key.split("-")[1] in keys and self.action_trigger:
+                key = key.split("-")[1]
+                self.rotate_side(keys[key], -1)
                 
         elif self.game_mode == "solver":
             if key == 's' and len(self.next) == 0 and self.action_trigger:
