@@ -20,12 +20,18 @@ def rotate(cube, s):
         pattern.append(move)
     return (cube)    
 
+def exploration(cube, allowed, func, **kwargs):
+    cube1 = Cube()
+    cube1.copy(cube)
+    tree = TreeCube(cube1, allowed=allowed)
+    return(tree.search(func, **kwargs))
+
 def badEdges(sticker, sticker2):
     if sticker[0] == "L" or sticker[0] == "R" or ((sticker[0] == "F" or sticker[0] == "B") and (sticker2[0] == "U" or sticker2[0] == "D")):
         return (1)
     return (0)
 
-def eoDetection(cube, faces=["U", "D", "F", "B"]):
+def eoDetection(cube):
     bad_edges = {}
     #U face edges
     bad_edges["u1"] = badEdges(cube.face_up.item(1), cube.face_back.item(1))
@@ -51,25 +57,6 @@ def eoDetection(cube, faces=["U", "D", "F", "B"]):
     return (bad_edges)
 
 
-def badEdgesOnFB(cube, nb, get=False):
-    bad_edges = eoDetection(cube)
-    bad = [k for k, v in bad_edges.items() if v == 1]
-    f = [k[0] for k in bad].count("f") + bad_edges["u7"] + bad_edges["d1"]
-    b = [k[0] for k in bad].count("b") + bad_edges["u1"] + bad_edges["d7"]
-    if get:
-        return ((f, b))
-    else:
-        if f == nb or b == nb:
-            return (True)
-    return (False)
-
-def exploration(cube, allowed, func, **kwargs):
-    cube1 = Cube()
-    cube1.copy(cube)
-    tree = TreeCube(cube1, allowed=allowed)
-    return(tree.search(func, **kwargs))
-
-
 def edgeOrienting(cube, bad_edges):
     bad = [k for k, v in bad_edges.items() if v == 1]
     if len(bad) == 0:
@@ -93,20 +80,62 @@ def edgeOrienting(cube, bad_edges):
             cube = rotate(cube, "F")
         else:
             cube = rotate(cube, "B")
-
-        pass
     return (cube)
 
+def badEdgesOnFB(cube, nb, get=False):
+    bad_edges = eoDetection(cube)
+    bad = [k for k, v in bad_edges.items() if v == 1]
+    f = [k[0] for k in bad].count("f") + bad_edges["u7"] + bad_edges["d1"]
+    b = [k[0] for k in bad].count("b") + bad_edges["u1"] + bad_edges["d7"]
+    if get:
+        return ((f, b))
+    else:
+        if f == nb or b == nb:
+            return (True)
+    return (False)
 
+
+
+def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
+    for i in items:
+        if cube.face_up.item(i)[0] != 'U' and cube.face_up.item(i)[0] != 'D':
+            return (False)
+    for i in items:
+        if cube.face_down.item(i)[0] != 'U' and cube.face_down.item(i)[0] != 'D':
+            return(False)
+    return (True)
+
+def UDEdges(cube):
+    ude = isUDColor(cube)
+    if ude == True:
+        return(cube)
+    for i in [[1, 7], [1, 3 ,7], [1, 3, 5, 7]]:
+        m = exploration(cube, ["R", "U", "L", "D", "F2", "B2"], isUDColor, items=i)
+        cube = rotate(cube, m)
+    return (cube)
+
+def UDCorners(cube):
+    ude = isUDColor(cube)
+    if ude == True:
+        return(cube)
+    for i in [[1, 3, 5, 7]]:
+        m = exploration(cube, ["R", "U", "L", "D", "F2", "B2"], isUDColor, items=i)
+        cube = rotate(cube, m)
+    return (cube)
 
 def solver(cube):
     global pattern
     pattern = []
+    # Step 1
     bad_edges = eoDetection(cube)
     while sum(bad_edges.values()) > 0:
         cube = edgeOrienting(cube ,bad_edges)
         bad_edges = eoDetection(cube)
+    # Step 1 done
+    #UDEdges(cube)
+    #UDCorners(cube)
     print(pattern)
+    return (" ".join(pattern))
 
 def main():
     cube = Cube()
@@ -127,7 +156,7 @@ if __name__ == "__main__":
 
 
 # Phase 1 <U,D,L,R,F2,B2> F and B to switch BAD to GOOD and GOOD to BAD
-# EO (edge orientation) : all edge to good pos, (ZZ method or ROUX) 7 moves worst case
+# EO (edge orientation) : all edge to good pos, (ZZ method) 7 moves worst case
 
 # https://www.speedsolving.com/wiki/index.php/Edge_Orientation#ZZ
 
@@ -135,9 +164,13 @@ if __name__ == "__main__":
 
 # Phase 2 <U,D,L,R,F2,B2> 
 # Corner orientation :  10 moves worst case
+# 2.1 placement of U/D edges in U/D faces (whatever if it's U or D just place it on U or D)
+# 2.2 Corner Orientation, and placement
 
 # Phase 3 <U,D,L2,R2,F2,B2>
 # Every colors are on there face or the opposit, 13 moves worst case 
+# 3.1 Corners
+# 3.2 Edges
 
 
 # Phase 4 <U2,D2,L2,R2,F2,B2> 
