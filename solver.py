@@ -62,7 +62,9 @@ def edgeOrienting(cube, bad_edges):
     if len(bad) == 0:
         return (cube)
 
-    if len(bad) > 2:
+    if bad == ['u1', 'u7', 'd1', 'd7'] or bad == ['u3', 'u5', 'd3', 'd5']:
+        cube = rotate(cube, "U") 
+    elif len(bad) > 2:
         # only use <R, U, L, D, F2, B2>
         # exploration to 4 bad edge on F or B
         m = exploration(cube, ["R", "U", "L", "D", "F2", "B2"], badEdgesOnFB, nb=4)
@@ -94,6 +96,79 @@ def badEdgesOnFB(cube, nb, get=False):
             return (True)
     return (False)
 
+##########################################################################################################
+
+def badEdges2(sticker, sticker2):
+    if sticker[0] == "B" or sticker[0] == "F" or ((sticker[0] == "L" or sticker[0] == "R") and (sticker2[0] == "U" or sticker2[0] == "D")):
+        return (1)
+    return (0)
+
+def eoDetection2(cube):
+    bad_edges = {}
+    #U face edges
+    bad_edges["u1"] = badEdges2(cube.face_up.item(1), cube.face_back.item(1))
+    bad_edges["u3"] = badEdges2(cube.face_up.item(3), cube.face_left.item(1))
+    bad_edges["u5"] = badEdges2(cube.face_up.item(5), cube.face_right.item(1))
+    bad_edges["u7"] = badEdges2(cube.face_up.item(7), cube.face_front.item(1))
+
+    #D face edges
+    bad_edges["d1"] = badEdges2(cube.face_down.item(1), cube.face_front.item(7))
+    bad_edges["d3"] = badEdges2(cube.face_down.item(3), cube.face_left.item(7))
+    bad_edges["d5"] = badEdges2(cube.face_down.item(5), cube.face_right.item(7))
+    bad_edges["d7"] = badEdges2(cube.face_down.item(7), cube.face_back.item(7))
+
+    #F E-slice edges
+    bad_edges["r3"] = badEdges2(cube.face_right.item(3), cube.face_front.item(5))
+    bad_edges["r5"] = badEdges2(cube.face_right.item(5), cube.face_back.item(3))
+
+    #B E-slice edges
+    bad_edges["l3"] = badEdges2(cube.face_left.item(3), cube.face_back.item(5))
+    bad_edges["l5"] = badEdges2(cube.face_left.item(5), cube.face_front.item(3))
+
+    #print(f"bad edges: {sum(bad_edges.values())}")
+    return (bad_edges)
+
+
+def edgeOrienting2(cube, bad_edges):
+    bad = [k for k, v in bad_edges.items() if v == 1]
+    if len(bad) == 0:
+        return (cube)
+
+    if bad == ['u1', 'u7', 'd1', 'd7'] or bad == ['u3', 'u5', 'd3', 'd5']:
+        cube = rotate(cube, "U")
+    if len(bad) > 2:
+        # only use <R, U, L, D, F2, B2>
+        # exploration to 4 bad edge on F or B
+        m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=4)
+        cube = rotate(cube, m)
+        if badEdgesOnRL(cube, 4, True)[0] == 4:
+            cube = rotate(cube, "R")
+        else:
+            cube = rotate(cube, "L")
+    else:
+        # only use <R, U, L, D, F2, B2>
+        # exploration to 1 bad edges on F or B
+        m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=1)
+        cube = rotate(cube, m)
+        if badEdgesOnRL(cube, 1, True)[0] == 1:
+            cube = rotate(cube, "R")
+        else:
+            cube = rotate(cube, "L")
+    return (cube)
+
+def badEdgesOnRL(cube, nb, get=False):
+    bad_edges = eoDetection2(cube)
+    bad = [k for k, v in bad_edges.items() if v == 1]
+    r = [k[0] for k in bad].count("r") + bad_edges["u5"] + bad_edges["d5"]
+    l = [k[0] for k in bad].count("l") + bad_edges["u3"] + bad_edges["d3"]
+    if get:
+        return ((r, l))
+    else:
+        if r == nb or l == nb:
+            return (True)
+    return (False)
+
+#---------------------------------------------------------------------------------------------------------
 
 
 def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
@@ -105,44 +180,55 @@ def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
             return(False)
     return (True)
 
-def UDEdges(cube):
-    ude = isUDColor(cube)
-    if ude == True:
-        return(cube)
-    for i in [[1, 7], [1, 3 ,7], [1, 3, 5, 7]]:
-        m = exploration(cube, ["R", "U", "L", "D", "F2", "B2"], isUDColor, items=i)
-        cube = rotate(cube, m)
+
+def UDCornersOrientation(cube):
+
     return (cube)
 
-def UDCorners(cube):
-    ude = isUDColor(cube)
-    if ude == True:
-        return(cube)
-    for i in [[1, 3, 5, 7]]:
-        m = exploration(cube, ["R", "U", "L", "D", "F2", "B2"], isUDColor, items=i)
-        cube = rotate(cube, m)
-    return (cube)
 
 def solver(cube):
     global pattern
     pattern = []
-    # Step 1
-    bad_edges = eoDetection(cube)
-    while sum(bad_edges.values()) > 0:
-        cube = edgeOrienting(cube ,bad_edges)
+    # Step 1 + 2.1
+    while isUDColor(cube, [1, 3, 5, 7]) == False:
         bad_edges = eoDetection(cube)
-    # Step 1 done
-    #UDEdges(cube)
-    #UDCorners(cube)
-    print(pattern)
+        while sum(bad_edges.values()) > 0:
+            cube = edgeOrienting(cube ,bad_edges)
+            bad_edges = eoDetection(cube)
+        if isUDColor(cube, [1, 3, 5, 7]):
+            break
+        bad_edges = eoDetection2(cube)
+        while sum(bad_edges.values()) > 0:
+            cube = edgeOrienting2(cube ,bad_edges)
+            bad_edges = eoDetection2(cube)
+    print("2 axis EO done")
+    # Step 2.2
+    #UDCornersOrientation(cube)
     return (" ".join(pattern))
 
+from random import randint
+from time import time
 def main():
     cube = Cube()
     scramble = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
     cube.scramble(scramble)
     cube.printCube()
     solver(cube)
+
+    timer = []
+    for i in range(2000):
+        cube.reset()
+        scramble = cube.random(randint(20, 200))
+        cube.scramble(scramble)
+        print(scramble)
+        print(f"cube : {i}")
+        start = time()
+        solver(cube)
+        end = time()
+        timer.append(end - start)
+    print(f"time avg: {sum(timer) / len(timer)}")
+    print(f"max time: {max(timer)}")
+
     return
 
 
@@ -157,7 +243,6 @@ if __name__ == "__main__":
 
 # Phase 1 <U,D,L,R,F2,B2> F and B to switch BAD to GOOD and GOOD to BAD
 # EO (edge orientation) : all edge to good pos, (ZZ method) 7 moves worst case
-
 # https://www.speedsolving.com/wiki/index.php/Edge_Orientation#ZZ
 
 
@@ -165,7 +250,10 @@ if __name__ == "__main__":
 # Phase 2 <U,D,L,R,F2,B2> 
 # Corner orientation :  10 moves worst case
 # 2.1 placement of U/D edges in U/D faces (whatever if it's U or D just place it on U or D)
+# https://www.speedsolving.com/wiki/index.php/Edge_Orientation#2-axis_EO
+
 # 2.2 Corner Orientation, and placement
+# https://www.speedsolving.com/wiki/index.php/Corner_Orientation
 
 # Phase 3 <U,D,L2,R2,F2,B2>
 # Every colors are on there face or the opposit, 13 moves worst case 

@@ -17,7 +17,7 @@ class Game(Ursina):
         self.model, self.texture = 'models/custom_cube', "textures/rubik_texture"
         self.load_game()
         self.scramble = ""
-        self.solver = ""
+        self.solver = []
         self.game_mode = "game"
         self.next = []
 
