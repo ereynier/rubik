@@ -12,8 +12,8 @@ def main():
         return
     cube = Cube()
     pattern = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
-    # pattern = cube.random(55)
-    pattern = "R U R2 F B L2 F' D' R' R' B2 D' B' F' R2 U' L D F' D U2 L2 L R' R' B L' B' F U2 B2 F L U' L2 F2 L2 L' R2 F B2 B' D2 U' R U' D D' U D B' L' R' B U2 U B' L D' F L' L' U B2 R L' F' U' D2 B2 R' L L2 L' D' L' L' R F"
+    # pattern = reducePattern(cube.random(55))
+    pattern = "R U R2 F B L2 F' D' R2 B2 D' B' F' R2 U' L D F' D U2 L' R2 B L' B' F U2 B2 F L U' L2 F2 L R2 F B D2 U' R D B' L' R' B U' B' L D' F L2 U B2 R L' F' U' D2 B2 R' L2 D' L2 R F"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()

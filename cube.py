@@ -1,4 +1,3 @@
-import imp
 import numpy as np
 from random import randint
 
@@ -27,6 +26,10 @@ class Cube:
         self.face_up = np.matrix([["U1", "U2", "U3"], ["U4", "U5", "U6"], ["U7", "U8", "U9"]])
         self.face_down = np.matrix([["D1", "D2", "D3"], ["D4", "D5", "D6"], ["D7", "D8", "D9"]])
         self.face_back = np.matrix([["B1", "B2", "B3"], ["B4", "B5", "B6"], ["B7", "B8", "B9"]])
+
+    def sides(self):
+        sides = {"F" : self.face_front, "R": self.face_right, "U": self.face_up, "B": self.face_back, "L": self.face_left, "D": self.face_down}
+        return (sides)
 
     def printCube(self):
         a = f"""
@@ -162,6 +165,41 @@ class Cube:
             reversed.append(move)
         return(" ".join(reversed))
 
+    def reducePattern(self, pattern: str):
+        p = pattern.strip().split(" ")
+        change = 1
+        while change > 0 and len(p) > 1:
+            change = 0
+            reduced = []
+            i = 0
+            while i < len(p) - 1:
+                if p[i][0] == p[i + 1][0]:
+                    change = 1
+                    if len(p[i]) == 1:
+                        p[i] = p[i] + "0"
+                    if len(p[i+1]) == 1:
+                        p[i + 1] = p[i + 1] + "0"
+                    if p[i][1] == "2" and p[i+1][1] == "2":
+                        pass
+                    elif p[i][1] == "0" and p[i+1][1] == "0":
+                        reduced.append(p[i][0] + "2")
+                    elif p[i][1] == "'" and p[i+1][1] == "'":
+                        reduced.append(p[i][0] + "2")
+                    elif (p[i][1] == "2" and p[i+1][1] == "'") or (p[i+1][1] == "2" and p[i][1] == "'"):
+                        reduced.append(p[i][0])
+                    elif (p[i][1] == "2" and p[i+1][1] == "0") or (p[i+1][1] == "2" and p[i][1] == "0"):
+                        reduced.append(p[i][0] + "'")
+                    elif (p[i][1] == "'" and p[i+1][1] == "0") or (p[i+1][1] == "'" and p[i][1] == "0"):
+                        pass
+                    i += 1
+                else:
+                    reduced.append(p[i])
+                i += 1
+            if i == len(p) - 1:
+                reduced.append(p[i])
+            p = reduced
+                    
+        return(" ".join(reduced).strip())
 
     def random(self, nb_moves=randint(1, 40)):
         faces = ["F", "R", "U", "B", "L", "D"]

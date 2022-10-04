@@ -137,8 +137,8 @@ def edgeOrienting2(cube, bad_edges):
     if bad == ['u1', 'u7', 'd1', 'd7'] or bad == ['u3', 'u5', 'd3', 'd5']:
         cube = rotate(cube, "U")
     if len(bad) > 2:
-        # only use <R, U, L, D, F2, B2>
-        # exploration to 4 bad edge on F or B
+        # only use <R2, U, L2, D, F, B>
+        # exploration to 4 bad edge on R or L
         m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=4)
         cube = rotate(cube, m)
         if badEdgesOnRL(cube, 4, True)[0] == 4:
@@ -146,8 +146,8 @@ def edgeOrienting2(cube, bad_edges):
         else:
             cube = rotate(cube, "L")
     else:
-        # only use <R, U, L, D, F2, B2>
-        # exploration to 1 bad edges on F or B
+        # only use <R2, U, L2, D, F, B>
+        # exploration to 1 bad edges on R or L
         m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=1)
         cube = rotate(cube, m)
         if badEdgesOnRL(cube, 1, True)[0] == 1:
@@ -181,10 +181,56 @@ def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
     return (True)
 
 
+def tweakCOAlgo(algo: str, face_up):
+    new_algo = ""
+    if face_up == "U":
+        new_algo = algo
+    elif face_up == "D":
+        new_algo = algo.replace('U', 'temp').replace('B', 'F').replace('D', 'U').replace('F', 'B').replace('temp', 'D')
+    elif face_up == "F":
+        new_algo = algo.replace('U', 'temp').replace('B', 'U').replace('D', 'B').replace('F', 'D').replace('temp', 'F')
+    elif face_up == "B":
+        new_algo = algo.replace('U', 'temp').replace('B', 'D').replace('D', 'F').replace('F', 'U').replace('temp', 'B')
+    elif face_up == "R":
+        new_algo = algo.replace('U', 'temp').replace('L', 'U').replace('D', 'L').replace('R', 'D').replace('temp', 'R')
+    elif face_up == "L":
+        new_algo = algo.replace('U', 'temp').replace('L', 'D').replace('D', 'R').replace('R', 'U').replace('temp', 'L')
+    return (new_algo)
+
+def countBadCorner(cube, f):
+    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
+    bad = 0
+    for i in [0, 2, 6, 8]:
+        if cube.sides()[f].item(i)[0] != f and cube.sides()[f].item(i)[0] != opposit[f]:
+            bad += 1
+    return (bad)
+
+def isGoodColor(color, f):
+    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
+    if color == f or color == opposit[f]:
+        return (True)
+    return (False)
+
+def cornerDirection():
+    return
+
+def twoCorners(cube, f):
+    
+    return ()
+
 def UDCornersOrientation(cube):
 
+    for f in ["F", "R", "U", "B", "L", "D"]:
+        # count bad color
+        # while >= 2 turn to known pos, if not known found -> next face
+        while countBadCorner(cube, f) >= 2:
+            m = twoCorners(cube, f)
+            if m == 0:
+                break
+            rotate(cube, m)
+            # exec algo
+        pass
     return (cube)
-
 
 def solver(cube):
     global pattern
@@ -203,8 +249,8 @@ def solver(cube):
             bad_edges = eoDetection2(cube)
     print("2 axis EO done")
     # Step 2.2
-    #UDCornersOrientation(cube)
-    return (" ".join(pattern))
+    #cube = UDCornersOrientation(cube)
+    return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint
 from time import time
