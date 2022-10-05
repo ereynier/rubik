@@ -198,10 +198,9 @@ def tweakCOAlgo(algo: str, face_up):
     return (new_algo)
 
 def countBadCorner(cube, f):
-    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
     bad = 0
     for i in [0, 2, 6, 8]:
-        if cube.sides()[f].item(i)[0] != f and cube.sides()[f].item(i)[0] != opposit[f]:
+        if cube.sides()[f].item(i)[0] == "D" or cube.sides()[f].item(i)[0] == "U":
             bad += 1
     return (bad)
 
@@ -211,25 +210,18 @@ def isGoodColor(color, f):
         return (True)
     return (False)
 
-def cornerDirection():
-    return
+def knownDRTrigegr(cube, bad_count):
 
-def twoCorners(cube, f):
-    
-    return ()
+    return (False)
 
 def UDCornersOrientation(cube):
-
-    for f in ["F", "R", "U", "B", "L", "D"]:
-        # count bad color
-        # while >= 2 turn to known pos, if not known found -> next face
-        while countBadCorner(cube, f) >= 2:
-            m = twoCorners(cube, f)
-            if m == 0:
-                break
-            rotate(cube, m)
-            # exec algo
-        pass
+    while isUDColor(cube) == False:
+        # count U/D stickers on F R B L
+        bad = 0
+        for f in ["F", "R", "B", "L"]:
+            bad += countBadCorner(f)
+        # search for un known DR trigger (can be a 2c or 3c trigger if no 4c found for 4+ count) (only U D allowed ?)
+        # apply trigger
     return (cube)
 
 def solver(cube):
@@ -250,6 +242,12 @@ def solver(cube):
     print("2 axis EO done")
     # Step 2.2
     #cube = UDCornersOrientation(cube)
+    # cube = rotate(cube, "U2")
+    # cube = rotate(cube, tweakCOAlgo("L' U D' L U' D L'", "D"))
+
+    cube = rotate(cube, "U L' U R2 U' L")
+    cube = rotate(cube, "U2 D2")
+    cube = rotate(cube, "U R' D L2 D' R")
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint
@@ -298,8 +296,8 @@ if __name__ == "__main__":
 # 2.1 placement of U/D edges in U/D faces (whatever if it's U or D just place it on U or D)
 # https://www.speedsolving.com/wiki/index.php/Edge_Orientation#2-axis_EO
 
-# 2.2 Corner Orientation, and placement
-# https://www.speedsolving.com/wiki/index.php/Corner_Orientation
+# 2.2 Corner Orientation
+# https://www.cuberoot.me/dr-trigger/
 
 # Phase 3 <U,D,L2,R2,F2,B2>
 # Every colors are on there face or the opposit, 13 moves worst case 
