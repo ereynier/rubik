@@ -1,5 +1,7 @@
 from cube import Cube
 from tree import TreeCube
+import multiprocessing as mp
+
 
 def rotate(cube, s):
     faces = {"F" : cube.FRONT, "R": cube.RIGHT, "U": cube.UP, "B": cube.BACK, "L": cube.LEFT, "D": cube.DOWN}
@@ -20,11 +22,54 @@ def rotate(cube, s):
         pattern.append(move)
     return (cube)    
 
-def exploration(cube, allowed, func, **kwargs):
+def find(cube, run, i, return_code, allowed, func, kwargs):
     cube1 = Cube()
     cube1.copy(cube)
-    tree = TreeCube(cube1, allowed=allowed)
-    return(tree.search(func, **kwargs))
+    if i != "":
+        if len(i) > 1 and i[1] == 2:
+            cube1.faces[i[0]]()
+            cube1.faces[i[0]]()
+        elif len(i) > 1 and i[1] == '':
+            cube1.faces[i[0]](True)
+        else:
+            cube1.faces[i[0]]()
+    tree = TreeCube(cube1, run, allowed=allowed, move=i)
+    m = tree.search(func, **kwargs)
+    if m != None:
+        return_code["start_"+i] = i + " " + m
+    run.clear()
+
+def exploration(cube, allowed, func, **kwargs):
+    start = [x for x in allowed]
+    start.insert(0, "")
+    for i in allowed:
+        if len(i) == 1:
+            start.append(i + "'")
+            start.append(i + "2")
+    processes = []
+    manager = mp.Manager()
+    return_code = manager.dict()
+    run = manager.Event()
+    run.set()  # We should keep running.
+    for i in start:
+        process = mp.Process(
+            target=find, args=(cube, run, i, return_code, allowed, func, kwargs)
+        )
+        processes.append(process)
+        process.start()
+        if i == start[0]:
+            sleep(0.2)
+
+    for process in processes:
+        process.join()
+    print(return_code)
+    return([x for x in return_code.values() if x is not None][0])
+
+# def exploration(cube, allowed, func, **kwargs):
+#     cube1 = Cube()
+#     cube1.copy(cube)
+#     tree = TreeCube(cube1, allowed=allowed)
+#     return(tree.search(func, **kwargs))
 
 def badEdges(sticker, sticker2):
     if sticker[0] == "L" or sticker[0] == "R" or ((sticker[0] == "F" or sticker[0] == "B") and (sticker2[0] == "U" or sticker2[0] == "D")):
@@ -197,6 +242,27 @@ def tweakCOAlgo(algo: str, face_up):
         new_algo = algo.replace('U', 'temp').replace('L', 'D').replace('D', 'R').replace('R', 'U').replace('temp', 'L')
     return (new_algo)
 
+def tweakDRTrigger(algo, face_front):
+    new_algo = ""
+    if face_front == "F":
+        new_algo = algo
+    elif face_front == "R":
+        new_algo = algo.replace('F', 'temp').replace('L', 'F').replace('B', 'L').replace('R', 'B').replace('temp', 'R')
+    elif face_front == "B":
+        new_algo = tweakDRTrigger(tweakDRTrigger(algo, "R"), "R")
+    elif face_front == "L":
+        new_algo = algo.replace('F', 'temp').replace('R', 'F').replace('B', 'R').replace('L', 'B').replace('temp', 'L')
+    return (new_algo)
+
+def mirrorTweakDRTrigger(algo, mirror):
+    new_algo = ""
+    m_algo = algo.replace("'", 'temp').replace("L ", "L' ").replace("B ", "B' ").replace("R ", "R' ").replace("F ", "F' ").replace("U ", "U' ").replace("D ", "D' ").replace("temp", "")
+    if mirror == "U":
+        new_algo = m_algo.replace('U', 'tempU').replace('D', 'U').replace('tempU', 'D')
+    if mirror == "R":
+        new_algo = m_algo.replace('R', 'tempR').replace('L', 'R').replace('tempR', 'L')
+    return (new_algo)
+
 def countBadCorner(cube, f):
     bad = 0
     for i in [0, 2, 6, 8]:
@@ -210,18 +276,68 @@ def isGoodColor(color, f):
         return (True)
     return (False)
 
-def knownDRTrigegr(cube, bad_count):
+def whichTrigger(cube):
+    l_face = {"F": "L", "L": "B", "B": "R", "R": "F"}
+    r_face = {"F": "R", "R": "B", "B": "L", "L": "F"}
+    ud = ["U", "D"]
+    for f in ["F", "R", "B", "L"]:
+        #4c
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(2)[0] in ud and cube.sides()[f].item(6)[0] in ud and cube.sides()[l_face[f]].item(0)[0] in ud:
+            return (tweakDRTrigger(tweakDRTrigger("R U' R' U2 R U' R", "L"), f))
+        if cube.sides()[f].item(2)[0] in ud and cube.sides()[l_face[f]].item(2)[0] in ud and cube.sides()[l_face[f]].item(8)[0] in ud and cube.sides()[l_face[l_face[f]]].item(0)[0] in ud:
+            return (tweakDRTrigger("R' U' F2 U F2 R", f))
+        #mirror on right
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(2)[0] in ud and cube.sides()[f].item(8)[0] in ud and cube.sides()[r_face[f]].item(2)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R U' R' U2 R U' R", "L"), "R"), f))
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[r_face[f]].item(0)[0] in ud and cube.sides()[l_face[f]].item(6)[0] in ud and cube.sides()[r_face[r_face[f]]].item(2)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger("R' U' F2 U F2 R", "R"), f))
+        #mirror on top
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(6)[0] in ud and cube.sides()[f].item(8)[0] in ud and cube.sides()[r_face[f]].item(6)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R U' R' U2 R U' R", "L"), "U"), f))
+        if cube.sides()[f].item(8)[0] in ud and cube.sides()[l_face[f]].item(8)[0] in ud and cube.sides()[l_face[f]].item(2)[0] in ud and cube.sides()[l_face[l_face[f]]].item(6)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger("R' U' F2 U F2 R", "U"), f))
+        #3c
+        if cube.sides()[f].item(6)[0] in ud and cube.sides()[l_face[f]].item(6)[0] in ud and cube.sides()[l_face[l_face[f]]].item(2)[0] in ud:
+            return (tweakDRTrigger(tweakDRTrigger("R U' D R' U D' R", "L"), f))
+        #mirror on right
+        if cube.sides()[f].item(8)[0] in ud and cube.sides()[r_face[f]].item(8)[0] in ud and cube.sides()[r_face[r_face[f]]].item(0)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R U' D R' U D' R", "L"), "R"), f))
+        #mirror on top
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[l_face[f]].item(0)[0] in ud and cube.sides()[l_face[l_face[f]]].item(8)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R U' D R' U D' R", "L"), "U"), f))
+        #2c
+        if cube.sides()[f].item(2)[0] in ud and cube.sides()[l_face[f]].item(0)[0] in ud:
+            return (tweakDRTrigger(tweakDRTrigger("R D L2 D' R", "R"), f))
+        if cube.sides()[f].item(6)[0] in ud and cube.sides()[f].item(8)[0] in ud:
+            return (tweakDRTrigger("R U' R2 D R2 U R", f))
+        if cube.sides()[f].item(2)[0] in ud and cube.sides()[f].item(8)[0] in ud:
+            return (tweakDRTrigger("U R' D L2 D' R", f))
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(6)[0] in ud:
+            return (tweakDRTrigger(tweakDRTrigger("U L' U R2 U' L", "L"),f))
+        #mirror on right
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[r_face[f]].item(2)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R D L2 D' R", "R"), "R"), f))
+        #mirror on top
+        if cube.sides()[f].item(8)[0] in ud and cube.sides()[l_face[f]].item(6)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger(tweakDRTrigger("R D L2 D' R", "R"), "U"), f))
+        if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(2)[0] in ud:
+            return (tweakDRTrigger(mirrorTweakDRTrigger("R U' R2 D R2 U R", "U"), f))
+    return (None)
 
+def knownDRTrigger(cube):
+    if whichTrigger(cube) != None:
+        return (True)
     return (False)
 
 def UDCornersOrientation(cube):
     while isUDColor(cube) == False:
-        # count U/D stickers on F R B L
         bad = 0
         for f in ["F", "R", "B", "L"]:
-            bad += countBadCorner(f)
-        # search for un known DR trigger (can be a 2c or 3c trigger if no 4c found for 4+ count) (only U D allowed ?)
-        # apply trigger
+            bad += countBadCorner(cube, f)
+        print(bad)
+        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger)
+        cube = rotate(cube, m)
+        cube = rotate(cube, whichTrigger(cube))
     return (cube)
 
 def solver(cube):
@@ -240,18 +356,14 @@ def solver(cube):
             cube = edgeOrienting2(cube ,bad_edges)
             bad_edges = eoDetection2(cube)
     print("2 axis EO done")
+    print(cube.reducePattern(" ".join(pattern)))
     # Step 2.2
-    #cube = UDCornersOrientation(cube)
-    # cube = rotate(cube, "U2")
-    # cube = rotate(cube, tweakCOAlgo("L' U D' L U' D L'", "D"))
+    cube = UDCornersOrientation(cube)
 
-    cube = rotate(cube, "U L' U R2 U' L")
-    cube = rotate(cube, "U2 D2")
-    cube = rotate(cube, "U R' D L2 D' R")
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint
-from time import time
+from time import sleep, time
 def main():
     cube = Cube()
     scramble = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
@@ -259,19 +371,24 @@ def main():
     cube.printCube()
     solver(cube)
 
-    timer = []
-    for i in range(2000):
+    timer = {}
+    soluce = {}
+    for i in range(20):
         cube.reset()
-        scramble = cube.random(randint(20, 200))
+        scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
         print(scramble)
         print(f"cube : {i}")
         start = time()
-        solver(cube)
+        s = solver(cube)
         end = time()
-        timer.append(end - start)
-    print(f"time avg: {sum(timer) / len(timer)}")
-    print(f"max time: {max(timer)}")
+        timer[scramble] = (end - start)
+        soluce[scramble] = len(s.split())
+
+    print(f"time avg: {sum(timer.values()) / len(timer.values())}")
+    print(f"max time: {max(timer.values())}")
+    print(f"soluce len avg: {sum(soluce.values()) / len(soluce.values())}")
+    print(f"max soluce len: {max(soluce.values())}")
 
     return
 
@@ -298,6 +415,8 @@ if __name__ == "__main__":
 
 # 2.2 Corner Orientation
 # https://www.cuberoot.me/dr-trigger/
+# search for a known DR trigger (can be a 2c or 3c trigger if no 4c found for 4+ count) (U D F2 B2 R2 L2)
+# search on mirror axies too (addapt algo to mirrored)
 
 # Phase 3 <U,D,L2,R2,F2,B2>
 # Every colors are on there face or the opposit, 13 moves worst case 

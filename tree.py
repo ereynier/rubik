@@ -2,10 +2,11 @@ from cube import Cube
 
 
 class TreeCube:
-    def __init__(self, cube: Cube, allowed=["F", "R", "U", "B", "L", "D"]):
+    def __init__(self, cube: Cube, run, allowed=["F", "R", "U", "B", "L", "D"], move=""):
+        self.run = run
         self.childs = []
         self.cube = cube
-        self.move = ""
+        self.move = move
         self.depth = 0
         self.max_depth = 0
         self.moves = {
@@ -52,7 +53,7 @@ class TreeCube:
     def searchChilds(self, func, **kwargs):
         for move in self.allowed:
             cube = self.moves[move](move[0])
-            node = TreeCube(cube, allowed=self.allowed)
+            node = TreeCube(cube, self.run, allowed=self.allowed)
             node.move = move
             node.depth = self.depth + 1
             self.childs.append(node)
@@ -61,7 +62,7 @@ class TreeCube:
                 return (move)
 
     def nextDepth(self, depth, func, **kwargs):
-        while self.depth <= depth:
+        while self.depth <= depth and self.run.is_set():
             if self.depth < depth:
                 for child in self.childs:
                     m = child.nextDepth(depth, func, **kwargs)
