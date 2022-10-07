@@ -1,0 +1,13 @@
+{'start_': " R U B2 R D'"}
+{'start_': " U D' F2"}
+2 axis EO done
+R U B2 R D' F U D' F2 R
+6
+{'start_': 'U'}
+4
+{'start_': 'U'}
+2
+{'start_': ' R2 F2'}
+R U B2 R D' F U D' F2 R U L U' L2 D L2 U L U2 F' U B2 U' F R2 F2 B' D B2 U' B2 D' B
+len: 33
+Time elapsed: 68.07618951797485

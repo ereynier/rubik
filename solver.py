@@ -5,6 +5,8 @@ import multiprocessing as mp
 
 def rotate(cube, s):
     faces = {"F" : cube.FRONT, "R": cube.RIGHT, "U": cube.UP, "B": cube.BACK, "L": cube.LEFT, "D": cube.DOWN}
+    if s == None:
+        return (cube)
     moves = s.split()
     for move in moves:
         if len(move) > 2 or not move[0] in faces or (len(move) == 2 and (move[1] != "2" and move[1] != "'")):
@@ -36,33 +38,42 @@ def find(cube, run, i, return_code, allowed, func, kwargs):
     tree = TreeCube(cube1, run, allowed=allowed, move=i)
     m = tree.search(func, **kwargs)
     if m != None:
-        return_code["start_"+i] = i + " " + m
+        return_code["start_"+i] = m
     run.clear()
 
 def exploration(cube, allowed, func, **kwargs):
-    start = [x for x in allowed]
+    if func(cube, **kwargs):
+        return ("")
+    if pattern != []:
+        start = [x for x in allowed if x[0] != pattern[-1][0]]
+        if pattern[-1][0] == "B":
+            start = [k for k in start if k[0] != "F"]
+        elif pattern[-1][0] == "D":
+            start = [k for k in start if k[0] != "U"]
+        elif pattern[-1][0] == "L":
+            start = [k for k in start if k[0] != "R"]
+    else:
+        start = [x for x in allowed]
     start.insert(0, "")
-    for i in allowed:
-        if len(i) == 1:
-            start.append(i + "'")
-            start.append(i + "2")
+    s = len(start)
+    for i in range(s):
+        if len(start[i]) == 1:
+            start.append(start[i] + "'")
+            start.append(start[i] + "2")
     processes = []
     manager = mp.Manager()
     return_code = manager.dict()
     run = manager.Event()
-    run.set()  # We should keep running.
-    for i in start:
+    run.set()
+    for i in [""]: #replace [""] by start 
         process = mp.Process(
             target=find, args=(cube, run, i, return_code, allowed, func, kwargs)
         )
         processes.append(process)
         process.start()
-        if i == start[0]:
-            sleep(0.2)
-
     for process in processes:
         process.join()
-    print(return_code)
+
     return([x for x in return_code.values() if x is not None][0])
 
 # def exploration(cube, allowed, func, **kwargs):
@@ -331,10 +342,10 @@ def knownDRTrigger(cube):
 
 def UDCornersOrientation(cube):
     while isUDColor(cube) == False:
-        bad = 0
-        for f in ["F", "R", "B", "L"]:
-            bad += countBadCorner(cube, f)
-        print(bad)
+        # bad = 0
+        # for f in ["F", "R", "B", "L"]:
+        #     bad += countBadCorner(cube, f)
+        # print(bad)
         m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger)
         cube = rotate(cube, m)
         cube = rotate(cube, whichTrigger(cube))
@@ -356,7 +367,6 @@ def solver(cube):
             cube = edgeOrienting2(cube ,bad_edges)
             bad_edges = eoDetection2(cube)
     print("2 axis EO done")
-    print(cube.reducePattern(" ".join(pattern)))
     # Step 2.2
     cube = UDCornersOrientation(cube)
 

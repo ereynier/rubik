@@ -168,6 +168,7 @@ class Cube:
     def reducePattern(self, pattern: str):
         p = pattern.strip().split(" ")
         change = 1
+        reduced = []
         while change > 0 and len(p) > 1:
             change = 0
             reduced = []

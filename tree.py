@@ -1,5 +1,5 @@
 from cube import Cube
-
+from random import shuffle
 
 class TreeCube:
     def __init__(self, cube: Cube, run, allowed=["F", "R", "U", "B", "L", "D"], move=""):
@@ -81,6 +81,6 @@ class TreeCube:
     def search(self, func, **kwargs):
         m = self.searchChilds(func, **kwargs)
         if m != None:
-            return (m)
+            return (self.move + " " + m)
         return(self.nextDepth(1, func, **kwargs))
         

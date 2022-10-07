@@ -75,6 +75,8 @@ class Game(Ursina):
 
     def nextMove(self, pattern):
         faces = dict(zip('FRUBLD', 'FRONT RIGHT UP BACK LEFT DOWN'.split()))
+        if pattern == []:
+            return
         move = pattern[0]
         if len(move) > 2 or not move[0] in faces or (len(move) == 2 and (move[1] != "2" and move[1] != "'")):
             print(f"{move} not existing")
