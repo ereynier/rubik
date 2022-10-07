@@ -41,7 +41,7 @@ def find(cube, run, i, return_code, allowed, func, kwargs):
         return_code["start_"+i] = m
     run.clear()
 
-def exploration(cube, allowed, func, **kwargs):
+def exploration(cube, allowed, func, mono=False, **kwargs):
     if func(cube, **kwargs):
         return ("")
     if pattern != []:
@@ -65,7 +65,9 @@ def exploration(cube, allowed, func, **kwargs):
     return_code = manager.dict()
     run = manager.Event()
     run.set()
-    for i in [""]: #replace [""] by start 
+    if mono == True:
+        start = [""]
+    for i in start: #replace start by [""] to remove multiprocess
         process = mp.Process(
             target=find, args=(cube, run, i, return_code, allowed, func, kwargs)
         )
@@ -73,6 +75,8 @@ def exploration(cube, allowed, func, **kwargs):
         process.start()
     for process in processes:
         process.join()
+    # print(return_code)
+    # print(pattern)
 
     return([x for x in return_code.values() if x is not None][0])
 
@@ -195,7 +199,7 @@ def edgeOrienting2(cube, bad_edges):
     if len(bad) > 2:
         # only use <R2, U, L2, D, F, B>
         # exploration to 4 bad edge on R or L
-        m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=4)
+        m = exploration(cube, ["R2", "U", "L2", "D", "F2", "B2"], badEdgesOnRL, nb=4)
         cube = rotate(cube, m)
         if badEdgesOnRL(cube, 4, True)[0] == 4:
             cube = rotate(cube, "R")
@@ -204,7 +208,7 @@ def edgeOrienting2(cube, bad_edges):
     else:
         # only use <R2, U, L2, D, F, B>
         # exploration to 1 bad edges on R or L
-        m = exploration(cube, ["R2", "U", "L2", "D", "F", "B"], badEdgesOnRL, nb=1)
+        m = exploration(cube, ["R2", "U", "L2", "D", "F2", "B2"], badEdgesOnRL, nb=1)
         cube = rotate(cube, m)
         if badEdgesOnRL(cube, 1, True)[0] == 1:
             cube = rotate(cube, "R")
@@ -346,7 +350,7 @@ def UDCornersOrientation(cube):
         # for f in ["F", "R", "B", "L"]:
         #     bad += countBadCorner(cube, f)
         # print(bad)
-        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger)
+        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger, mono=True)
         cube = rotate(cube, m)
         cube = rotate(cube, whichTrigger(cube))
     return (cube)
@@ -355,13 +359,12 @@ def solver(cube):
     global pattern
     pattern = []
     # Step 1 + 2.1
-    while isUDColor(cube, [1, 3, 5, 7]) == False:
+    #while isUDColor(cube, [1, 3, 5, 7]) == False:
+    bad_edges = eoDetection(cube)
+    while sum(bad_edges.values()) > 0:
+        cube = edgeOrienting(cube ,bad_edges)
         bad_edges = eoDetection(cube)
-        while sum(bad_edges.values()) > 0:
-            cube = edgeOrienting(cube ,bad_edges)
-            bad_edges = eoDetection(cube)
-        if isUDColor(cube, [1, 3, 5, 7]):
-            break
+    if isUDColor(cube, [1, 3, 5, 7]) == False:
         bad_edges = eoDetection2(cube)
         while sum(bad_edges.values()) > 0:
             cube = edgeOrienting2(cube ,bad_edges)
@@ -383,7 +386,7 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(20):
+    for i in range(2000):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
@@ -396,9 +399,9 @@ def main():
         soluce[scramble] = len(s.split())
 
     print(f"time avg: {sum(timer.values()) / len(timer.values())}")
-    print(f"max time: {max(timer.values())}")
+    print(f"max time: {max(timer.values())} : {max(timer, key=timer.get)}")
     print(f"soluce len avg: {sum(soluce.values()) / len(soluce.values())}")
-    print(f"max soluce len: {max(soluce.values())}")
+    print(f"max soluce len: {max(soluce.values())} : {max(soluce, key=soluce.get)}")
 
     return
 
