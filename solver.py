@@ -31,44 +31,38 @@ def find(cube, run, i, return_code, allowed, func, kwargs):
         if len(i) > 1 and i[1] == 2:
             cube1.faces[i[0]]()
             cube1.faces[i[0]]()
-        elif len(i) > 1 and i[1] == '':
+        elif len(i) > 1 and i[1] == "'":
             cube1.faces[i[0]](True)
         else:
             cube1.faces[i[0]]()
     if func(cube1, **kwargs):
-        return (i)
+        return_code["start_"+i] = i
+        run.clear()
+        return
     tree = TreeCube(cube1, run, allowed=allowed, move=i)
     m = tree.search(func, **kwargs)
     if m != None:
         return_code["start_"+i] = m
     run.clear()
 
-def exploration(cube, allowed, func, mono=False, **kwargs):
+def exploration(cube, allowed, func, multi=False, **kwargs):
     if func(cube, **kwargs):
         return ("")
-    if pattern != []:
-        start = [x for x in allowed if x[0] != pattern[-1][0]]
-        if pattern[-1][0] == "B":
-            start = [k for k in start if k[0] != "F"]
-        elif pattern[-1][0] == "D":
-            start = [k for k in start if k[0] != "U"]
-        elif pattern[-1][0] == "L":
-            start = [k for k in start if k[0] != "R"]
+    if multi == False:
+        start = [""]
     else:
         start = [x for x in allowed]
-    s = len(start)
-    for i in range(s):
-        if len(start[i]) == 1:
-            start.append(start[i] + "'")
-            start.append(start[i] + "2")
+        s = len(start)
+        for i in range(s):
+            if len(start[i]) == 1:
+                start.append(start[i] + "'")
+                start.append(start[i] + "2")
     processes = []
     manager = mp.Manager()
     return_code = manager.dict()
     run = manager.Event()
     run.set()
-    if mono == True:
-        start = [""]
-    for i in [""]: #replace start by [""] to remove multiprocess
+    for i in start: #replace start by [""] to remove multiprocess
         process = mp.Process(
             target=find, args=(cube, run, i, return_code, allowed, func, kwargs)
         )
@@ -76,6 +70,7 @@ def exploration(cube, allowed, func, mono=False, **kwargs):
         process.start()
     for process in processes:
         process.join()
+    # print(start)
     # print(return_code)
     # print(pattern)
 
@@ -345,7 +340,7 @@ def UDCornersOrientation(cube):
         # for f in ["F", "R", "B", "L"]:
         #     bad += countBadCorner(cube, f)
         # print(bad)
-        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger, mono=True)
+        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger)
         cube = rotate(cube, m)
         cube = rotate(cube, whichTrigger(cube))
     return (cube)
@@ -367,7 +362,20 @@ def allFacesColor(cube, items=range(0,9)):
     return (True)
 
 def EdgePlace(cube):
-    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, items=[1, 3, 5, 7])
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, multi=True, items=[0, 2, 6, 8])
+    cube = rotate(cube, m)
+    return (cube)
+
+def allFacesSolved(cube, items=range(0,9)):
+    faces = {"F": cube.face_front, "R": cube.face_right, "B": cube.face_back, "L": cube.face_left, "U": cube.face_up, "D": cube.face_down}
+    for f in ["F", "R", "B", "L", "U", "D"]:
+        for i in items:
+            if isGoodColor(f, faces[f].item(i)[0], oppos=False) == False:
+                return (False)
+    return (True)
+
+def finalSolve(cube):
+    m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], allFacesSolved, multi=True)
     cube = rotate(cube, m)
     return (cube)
 
@@ -391,7 +399,9 @@ def solver(cube):
     print("CO done")
     # Step 3
     cube = EdgePlace(cube)
-
+    print("HTR Done")
+    # Step 4
+    #cube = finalSolve(cube)
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint
@@ -405,7 +415,7 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(20000):
+    for i in range(20):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
@@ -458,6 +468,7 @@ if __name__ == "__main__":
 
 # Phase 4 <U2,D2,L2,R2,F2,B2> 
 # Final resolution : 15 moves worst case
+# block building
 
 
 
