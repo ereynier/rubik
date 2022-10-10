@@ -366,7 +366,7 @@ def allFacesColor(cube, items=range(0,9)):
                 return (False)
     return (True)
 
-def EdgeColorPlaced(cube):
+def EdgePlace(cube):
     m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, items=[1, 3, 5, 7])
     cube = rotate(cube, m)
     return (cube)
@@ -390,7 +390,7 @@ def solver(cube):
     cube = UDCornersOrientation(cube)
     print("CO done")
     # Step 3
-    cube = EdgeColorPlaced(cube)
+    cube = EdgePlace(cube)
 
     return (cube.reducePattern(" ".join(pattern)))
 
@@ -451,9 +451,9 @@ if __name__ == "__main__":
 # search on mirror axies too (addapt algo to mirrored)
 
 # Phase 3 <U,D,L2,R2,F2,B2>
-# Every colors are on there face or the opposit, 13 moves worst case 
-# 3.1 Corners
-# 3.2 Edges
+# Every colors are on there face or the opposit, 13 moves worst case
+# 3.1 Edges
+# 3.2 Corners -> DR on another axis
 
 
 # Phase 4 <U2,D2,L2,R2,F2,B2> 
