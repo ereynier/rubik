@@ -49,5 +49,11 @@
 #     search()
 
 
-a = {'start_U': 'U D', 'start_': ' R2', 'start_D': 'D F2', 'start_F2': 'F2 U', 'start_R2': 'R2 U', 'start_L2': 'L2 U', "start_U'": "U' D", 'start_U2': 'U2 D', "start_D'": "D' F2", 'start_D2': 'D2 F2'}
-print(" ".join(sorted([x.split() for x in a.values() if x is not None], key=len)[0]))
+move = "U"
+allowed = ["R", "U", "L", "D", "F2", "B2"]
+
+prop = allowed
+allowed = [x for x in allowed if x != "R"]
+
+print(allowed)
+print(prop)

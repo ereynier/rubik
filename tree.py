@@ -9,13 +9,14 @@ class TreeCube:
         self.move = move
         self.depth = 0
         self.max_depth = 0
+        self.all_allowed = allowed.copy()
         self.moves = {
             "F" : self.rotate, "R": self.rotate, "U": self.rotate, "B": self.rotate, "L": self.rotate, "D": self.rotate,
             "F'" : self.prime, "R'": self.prime, "U'": self.prime, "B'": self.prime, "L'": self.prime, "D'": self.prime,
             "F2" : self.double, "R2": self.double, "U2": self.double, "B2": self.double, "L2": self.double, "D2": self.double,
         }
         # Turn same face 2 time in a row and turn F>B, U>D, R>L are not allowed
-        if self.move:
+        if self.move != "":
             allowed = [k for k in allowed if k[0] != self.move[0]]
             if self.move[0] == "B":
                 allowed = [k for k in allowed if k[0] != "F"]
@@ -26,8 +27,10 @@ class TreeCube:
         self.allowed = allowed.copy()
         for i in allowed:
             if len(i) == 1:
-                self.allowed.append(i + "'")
-                self.allowed.append(i + "2")
+                if i + "'" not in self.allowed:
+                    self.allowed.append(i + "'")
+                if i + "2" not in self.allowed:
+                    self.allowed.append(i + "2")
 
     def appendChild(self, child):
         self.childs.append(child)
@@ -53,8 +56,7 @@ class TreeCube:
     def searchChilds(self, func, **kwargs):
         for move in self.allowed:
             cube = self.moves[move](move[0])
-            node = TreeCube(cube, self.run, allowed=self.allowed)
-            node.move = move
+            node = TreeCube(cube, self.run, allowed=self.all_allowed, move=move)
             node.depth = self.depth + 1
             self.childs.append(node)
             #if new cube good stop and return arbo

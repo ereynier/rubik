@@ -35,6 +35,8 @@ def find(cube, run, i, return_code, allowed, func, kwargs):
             cube1.faces[i[0]](True)
         else:
             cube1.faces[i[0]]()
+    if func(cube1, **kwargs):
+        return (i)
     tree = TreeCube(cube1, run, allowed=allowed, move=i)
     m = tree.search(func, **kwargs)
     if m != None:
@@ -54,7 +56,6 @@ def exploration(cube, allowed, func, mono=False, **kwargs):
             start = [k for k in start if k[0] != "R"]
     else:
         start = [x for x in allowed]
-    start.insert(0, "")
     s = len(start)
     for i in range(s):
         if len(start[i]) == 1:
@@ -67,7 +68,7 @@ def exploration(cube, allowed, func, mono=False, **kwargs):
     run.set()
     if mono == True:
         start = [""]
-    for i in start: #replace start by [""] to remove multiprocess
+    for i in [""]: #replace start by [""] to remove multiprocess
         process = mp.Process(
             target=find, args=(cube, run, i, return_code, allowed, func, kwargs)
         )
@@ -285,12 +286,6 @@ def countBadCorner(cube, f):
             bad += 1
     return (bad)
 
-def isGoodColor(color, f):
-    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
-    if color == f or color == opposit[f]:
-        return (True)
-    return (False)
-
 def whichTrigger(cube):
     l_face = {"F": "L", "L": "B", "B": "R", "R": "F"}
     r_face = {"F": "R", "R": "B", "B": "L", "L": "F"}
@@ -355,6 +350,27 @@ def UDCornersOrientation(cube):
         cube = rotate(cube, whichTrigger(cube))
     return (cube)
 
+def isGoodColor(color, f, oppos=True):
+    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
+    if color == f:
+        return (True)
+    elif oppos == True and color == opposit[f]:
+        return (True)
+    return (False)
+
+def allFacesColor(cube, items=range(0,9)):
+    faces = {"F": cube.face_front, "R": cube.face_right, "B": cube.face_back, "L": cube.face_left, "U": cube.face_up, "D": cube.face_down}
+    for f in ["F", "R", "B", "L", "U", "D"]:
+        for i in items:
+            if isGoodColor(f, faces[f].item(i)[0], oppos=True) == False:
+                return (False)
+    return (True)
+
+def EdgeColorPlaced(cube):
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, items=[1, 3, 5, 7])
+    cube = rotate(cube, m)
+    return (cube)
+
 def solver(cube):
     global pattern
     pattern = []
@@ -372,11 +388,14 @@ def solver(cube):
     print("2 axis EO done")
     # Step 2.2
     cube = UDCornersOrientation(cube)
+    print("CO done")
+    # Step 3
+    cube = EdgeColorPlaced(cube)
 
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint
-from time import sleep, time
+from time import time
 def main():
     cube = Cube()
     scramble = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
@@ -386,11 +405,11 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(2000):
+    for i in range(20000):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
-        print(scramble)
+        #print(scramble)
         print(f"cube : {i}")
         start = time()
         s = solver(cube)

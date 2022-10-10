@@ -18,7 +18,8 @@ def main():
     #1300 move wirh multiprocerss V
     #pattern = cube.reducePattern("D' R2 F U2 D F U2 L F2 R' F' U L2 B R F' B L' U B F2 D2 B F B2 F' R2 U' D R U B' L2 U2 F2 U2 B' U' F L F' U B2 F2 B R D' R2 L2 D' F B2 L' U L' R' B' F D U' R' L' B D' R' U2 L D L R2 F' U' D' U L U' R' D' L2 R2 U2 B F B2 D' U F' U' L' U L F' U F D' U L' B' D2 R2 B L2 R' F2 R2 L2 D' U2 B2 U' L U' L' B L2 B' D' U F' D' L2 F D B' F")
     #68s without multiprocess V
-    pattern = cube.reducePattern("R' D2 B' F' R U' L' B' F2 L2 U R' U' F2 R D2 B2 F L' R' D2 R2 F' B2 R L2 B2 R2 B2 F2 D' U2 D' L2 F' U' L' R' L2 B2 U B' R' B' L B2 L' D U B' D2 B2 F' B' R L2 D2 L2 R L' U F U R F U L D L D F2 B U F R B2 U2 D' U D2 R2 F2 D R' F D U2 L' R' F' R F D U L2 F' L B U2 L' F' L2 U R2 L2 B R' U' L2 B D' F' L R' F' U' D' L2 D R2 U R' F2 D' L U' D2 B L2 R L2 U R' B")
+    #pattern = cube.reducePattern("R' D2 B' F' R U' L' B' F2 L2 U R' U' F2 R D2 B2 F L' R' D2 R2 F' B2 R L2 B2 R2 B2 F2 D' U2 D' L2 F' U' L' R' L2 B2 U B' R' B' L B2 L' D U B' D2 B2 F' B' R L2 D2 L2 R L' U F U R F U L D L D F2 B U F R B2 U2 D' U D2 R2 F2 D R' F D U2 L' R' F' R F D U L2 F' L B U2 L' F' L2 U R2 L2 B R' U' L2 B D' F' L R' F' U' D' L2 D R2 U R' F2 D' L U' D2 B L2 R L2 U R' B")
+    #pattern = "D2 B2 L' U D2 L2 U2 R2 B R' B2 R F' D' F2 D' L2 D2 B R' D' R2 D' U' F2 L2 B2 U2 D' U D L2"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()
