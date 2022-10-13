@@ -28,7 +28,7 @@ def find(cube, run, i, return_code, allowed, func, kwargs):
     cube1 = Cube()
     cube1.copy(cube)
     if i != "":
-        if len(i) > 1 and i[1] == 2:
+        if len(i) > 1 and i[1] == "2":
             cube1.faces[i[0]]()
             cube1.faces[i[0]]()
         elif len(i) > 1 and i[1] == "'":
@@ -361,22 +361,90 @@ def allFacesColor(cube, items=range(0,9)):
                 return (False)
     return (True)
 
-def EdgePlace(cube):
-    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, multi=True, items=[0, 2, 6, 8])
+def cornerPosition(cube, faces=["U", "D"]):
+    if "U" in faces:
+        if not cube.face_up.item(0) == "U0" and not cube.face_up.item(0) == "L0" and not cube.face_up.item(0) == "B2":
+            return (False)
+        if not cube.face_up.item(2) == "U2" and not cube.face_up.item(0) == "B0" and not cube.face_up.item(0) == "R2":
+            return (False)
+        if not cube.face_up.item(6) == "U6" and not cube.face_up.item(0) == "F0" and not cube.face_up.item(0) == "L2":
+            return (False)
+        if not cube.face_up.item(8) == "U8" and not cube.face_up.item(0) == "R0" and not cube.face_up.item(0) == "F2":
+            return (False)
+    if "D" in faces:
+        if not cube.face_down.item(0) == "D0" and not cube.face_down.item(0) == "L8" and not cube.face_down.item(0) == "F6":
+            return (False)
+        if not cube.face_down.item(2) == "D2" and not cube.face_down.item(0) == "F8" and not cube.face_down.item(0) == "R6":
+            return (False)
+        if not cube.face_down.item(6) == "D6" and not cube.face_down.item(0) == "B8" and not cube.face_down.item(0) == "L6":
+            return (False)
+        if not cube.face_down.item(8) == "D8" and not cube.face_down.item(0) == "R8" and not cube.face_down.item(0) == "B6":
+            return (False)
+    return (True)
+
+
+def cornerPlacement(cube):
+    # l_face = {"F": "L", "L": "B", "B": "R", "R": "F"}
+    # opposit = {"F" : "B", "R": "L", "B": "F", "L": "R"}
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, multi=True, items=[0, 2, 6, 8, 1, 3])
+    cube = rotate(cube, m)
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesColor, multi=True, items=[0, 2, 6, 8, 1, 3, 5, 7])
     cube = rotate(cube, m)
     return (cube)
 
-def allFacesSolved(cube, items=range(0,9)):
-    faces = {"F": cube.face_front, "R": cube.face_right, "B": cube.face_back, "L": cube.face_left, "U": cube.face_up, "D": cube.face_down}
-    for f in ["F", "R", "B", "L", "U", "D"]:
+def allFacesSolved(cube, items=range(0,9), faces=["F", "R", "B", "L", "U", "D"]):
+    for f in faces:
         for i in items:
-            if isGoodColor(f, faces[f].item(i)[0], oppos=False) == False:
+            if cube.sides()[f].item(i)[0] != f:
                 return (False)
     return (True)
 
+# def blockbuilding(cube, faces=["F", "L", "B", "R"], phase=0):
+#     if phase >= 0:
+#         for i in [0, 1, 3]:
+#             if cube.face_front.item(i)[0] != "F":
+#                 return (False)
+#         for i in [6, 7]:
+#             if cube.face_up.item(i)[0] != "U":
+#                 return (False)
+#         for i in [2, 5]:
+#             if cube.face_left.item(i)[0] != "L":
+#                 return (False)
+#     if phase >= 1:
+#         for i in [1, 2, 5]:
+#             if cube.face_left.item(i)[0] != "L":
+#                 return (False)
+#         for i in [3, 6, 7]:
+#             if cube.face_up.item(i)[0] != "U":
+#                 return (False)
+#     if phase >= 2:
+#         for i in [0, 1, 3]:
+#             if cube.face_right.item(i)[0] != "R":
+#                 return (False)
+#         for i in [8, 5]:
+#             if cube.face_up.item(i)[0] != "U":
+#                 return (False)
+#         for i in [2, 5]:
+#             if cube.face_front.item(i)[0] != "F":
+#                 return (False)
+#     if phase >= 3:
+#         for i in [1, 2, 5]:
+#             if cube.face_down.item(i)[0] != "D":
+#                 return (False)
+#         for i in [7, 8]:
+#             if cube.face_front.item(i)[0] != "F":
+#                 return (False)
+#         for i in [6, 7]:
+#             if cube.face_right.item(i)[0] != "R":
+#                 return (False)
+#     return (True)
+
 def finalSolve(cube):
-    m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], allFacesSolved, multi=True)
-    cube = rotate(cube, m)
+    # for i in range(3):
+    #     m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], blockbuilding, multi=True, phase=i)
+    #     cube = rotate(cube, m)
+    # m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], allFacesSolved, multi=True, faces=["F", "R", "B", "L"], items=[0, 2])
+    # cube = rotate(cube, m)
     return (cube)
 
 def solver(cube):
@@ -397,14 +465,14 @@ def solver(cube):
     # Step 2.2
     cube = UDCornersOrientation(cube)
     print("CO done")
+    cube = cornerPlacement(cube)
+    print("HTR done")
     # Step 3
-    cube = EdgePlace(cube)
-    print("HTR Done")
     # Step 4
-    #cube = finalSolve(cube)
+    cube = finalSolve(cube)
     return (cube.reducePattern(" ".join(pattern)))
 
-from random import randint
+from random import randint, random
 from time import time
 def main():
     cube = Cube()
@@ -415,7 +483,7 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(20):
+    for i in range(200):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
@@ -463,7 +531,7 @@ if __name__ == "__main__":
 # Phase 3 <U,D,L2,R2,F2,B2>
 # Every colors are on there face or the opposit, 13 moves worst case
 # 3.1 Edges
-# 3.2 Corners -> DR on another axis
+# 3.2 Corners
 
 
 # Phase 4 <U2,D2,L2,R2,F2,B2> 

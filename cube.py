@@ -2,17 +2,17 @@ import numpy as np
 from random import randint
 
 #                            U
-#                    [['U1' 'U2' 'U3']]
-#                    [['U4' 'U5' 'U6']]
-#                    [['U7' 'U8' 'U9']]
+#                    [['U0' 'U1' 'U2']]
+#                    [['U3' 'U4' 'U5']]
+#                    [['U6' 'U7' 'U8']]
 #         L                  F                  R                  B
-# [['L1' 'L2' 'L3']] [['F1' 'F2' 'F3']] [['R1' 'R2' 'R3']] [['B1' 'B2' 'B3']]    [[0 1 2]]                          <-┐  
-# [['L4' 'L5' 'L6']] [['F4' 'F5' 'F6']] [['R4' 'R5' 'R6']] [['B4' 'B5' 'B6']]    [[3 4 5]]              rot90 1 ->    |
-# [['L7' 'L8' 'L9']] [['F7' 'F8' 'F9']] [['R7' 'R8' 'R9']] [['B7' 'B8' 'B9']]    [[6 7 8]]
+# [['L0' 'L1' 'L2']] [['F0' 'F1' 'F2']] [['R0' 'R1' 'R2']] [['B0' 'B1' 'B2']]    [[0 * 2]]                          <-┐  
+# [['L3' 'L4' 'L5']] [['F3' 'F4' 'F5']] [['R3' 'R4' 'R5']] [['B3' 'B4' 'B5']]    [[3 4 5]]              rot90 * ->    |
+# [['L6' 'L7' 'L8']] [['F6' 'F7' 'F8']] [['R6' 'R7' 'R8']] [['B6' 'B7' 'B8']]    [[6 7 8]]
 #                            D
-#                    [['D1' 'D2' 'D3']]
-#                    [['D4' 'D5' 'D6']]
-#                    [['D7' 'D8' 'D9']]
+#                    [['D0' 'D1' 'D2']]
+#                    [['D3' 'D4' 'D5']]
+#                    [['D6' 'D7' 'D8']]
 
 class Cube:
     def __init__(self):
@@ -20,12 +20,12 @@ class Cube:
         self.faces = {"F" : self.FRONT, "R": self.RIGHT, "U": self.UP, "B": self.BACK, "L": self.LEFT, "D": self.DOWN}
 
     def reset(self):
-        self.face_left = np.matrix([["L1", "L2", "L3"], ["L4", "L5", "L6"], ["L7", "L8", "L9"]])
-        self.face_right = np.matrix([["R1", "R2", "R3"], ["R4", "R5", "R6"], ["R7", "R8", "R9"]])
-        self.face_front = np.matrix([["F1", "F2", "F3"], ["F4", "F5", "F6"], ["F7", "F8", "F9"]])
-        self.face_up = np.matrix([["U1", "U2", "U3"], ["U4", "U5", "U6"], ["U7", "U8", "U9"]])
-        self.face_down = np.matrix([["D1", "D2", "D3"], ["D4", "D5", "D6"], ["D7", "D8", "D9"]])
-        self.face_back = np.matrix([["B1", "B2", "B3"], ["B4", "B5", "B6"], ["B7", "B8", "B9"]])
+        self.face_left = np.matrix([["L0", "L1", "L2"], ["L3", "L4", "L5"], ["L6", "L7", "L8"]])
+        self.face_right = np.matrix([["R0", "R1", "R2"], ["R3", "R4", "R5"], ["R6", "R7", "R8"]])
+        self.face_front = np.matrix([["F0", "F1", "F2"], ["F3", "F4", "F5"], ["F6", "F7", "F8"]])
+        self.face_up = np.matrix([["U0", "U1", "U2"], ["U3", "U4", "U5"], ["U6", "U7", "U8"]])
+        self.face_down = np.matrix([["D0", "D1", "D2"], ["D3", "D4", "D5"], ["D6", "D7", "D8"]])
+        self.face_back = np.matrix([["B0", "B1", "B2"], ["B3", "B4", "B5"], ["B6", "B7", "B8"]])
 
     def sides(self):
         sides = {"F" : self.face_front, "R": self.face_right, "U": self.face_up, "B": self.face_back, "L": self.face_left, "D": self.face_down}
@@ -166,7 +166,9 @@ class Cube:
         return(" ".join(reversed))
 
     def reducePattern(self, pattern: str):
-        p = pattern.strip().split(" ")
+        if len(pattern.strip().split()) == 1:
+            return (pattern)
+        p = pattern.strip().split()
         change = 1
         reduced = []
         while change > 0 and len(p) > 1:

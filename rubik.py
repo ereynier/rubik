@@ -20,6 +20,8 @@ def main():
     #68s without multiprocess V
     #pattern = cube.reducePattern("R' D2 B' F' R U' L' B' F2 L2 U R' U' F2 R D2 B2 F L' R' D2 R2 F' B2 R L2 B2 R2 B2 F2 D' U2 D' L2 F' U' L' R' L2 B2 U B' R' B' L B2 L' D U B' D2 B2 F' B' R L2 D2 L2 R L' U F U R F U L D L D F2 B U F R B2 U2 D' U D2 R2 F2 D R' F D U2 L' R' F' R F D U L2 F' L B U2 L' F' L2 U R2 L2 B R' U' L2 B D' F' L R' F' U' D' L2 D R2 U R' F2 D' L U' D2 B L2 R L2 U R' B")
     #pattern = "D2 B2 L' U D2 L2 U2 R2 B R' B2 R F' D' F2 D' L2 D2 B R' D' R2 D' U' F2 L2 B2 U2 D' U D L2"
+    #45s CP V
+    pattern = "B' D2 U2 F D R B F' U2 R2 F2 R2 F2 D' L' R' L2 F' U' B F2 B' F2 R' B2 L' F' R2 U2 B' L2 D R2 F2 B F2 U D2 U' D2 L' D2 L D2 L' U F R U F' D F' R L' B2 D' B2 L2 R F2 L' B U' L R' U2 B F D L2 U L F' L2 B' U2 L2 R B U' D2 F' B F2 U R B' U' D' U2 B' R' B2 R'"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()
