@@ -13,7 +13,7 @@ def main():
     cube = Cube()
     pattern = "L2 F R2 B U2 B' F2 U2 F L2 D' L' B' R' F D' F U2 B2 B'"
     #pattern = cube.reducePattern(cube.random(55))
-    #pattern = "R U R2 F B L2 F' D' R2 B2 D' B' F' R2 U' L D F' D U2 L' R2 B L' B' F U2 B2 F L U' L2 F2 L R2 F B D2 U' R D B' L' R' B U' B' L D' F L2 U B2 R L' F' U' D2 B2 R' L2 D' L2 R F"
+    pattern = "R U R2 F B L2 F' D' R2 B2 D' B' F' R2 U' L D F' D U2 L' R2 B L' B' F U2 B2 F L U' L2 F2 L R2 F B D2 U' R D B' L' R' B U' B' L D' F L2 U B2 R L' F' U' D2 B2 R' L2 D' L2 R F"
     #pattern = cube.reducePattern("L R D2 U2 D2 U L' U' R' F' R L' B' L2 B L' R2 U2 B' R L R' U' R' D2 F2 R D2 L U' R2 B' R2 U2 R' L F2 B' L2 B' L2 R' F' L2 U B2 L D U2 L2 D2 B2 R' L B2 U B2 F U2 R2 B R2 D U' D2 F2 U2 L R2 U2 L U F2 L' D' U2 L' F2 B' D U D' L' R2 U' B2 U' F D' U B D U D2 R U' F2 R B2 L D2 U L D' F L' D' R2 L' B L' D2 L2 D2 L2 U2 F' D' F' L2 R2 U R' D2 B R B2 R' D' B' L' F R L' B R")
     #1300 move wirh multiprocerss V
     #pattern = cube.reducePattern("D' R2 F U2 D F U2 L F2 R' F' U L2 B R F' B L' U B F2 D2 B F B2 F' R2 U' D R U B' L2 U2 F2 U2 B' U' F L F' U B2 F2 B R D' R2 L2 D' F B2 L' U L' R' B' F D U' R' L' B D' R' U2 L D L R2 F' U' D' U L U' R' D' L2 R2 U2 B F B2 D' U F' U' L' U L F' U F D' U L' B' D2 R2 B L2 R' F2 R2 L2 D' U2 B2 U' L U' L' B L2 B' D' U F' D' L2 F D B' F")
@@ -21,7 +21,7 @@ def main():
     #pattern = cube.reducePattern("R' D2 B' F' R U' L' B' F2 L2 U R' U' F2 R D2 B2 F L' R' D2 R2 F' B2 R L2 B2 R2 B2 F2 D' U2 D' L2 F' U' L' R' L2 B2 U B' R' B' L B2 L' D U B' D2 B2 F' B' R L2 D2 L2 R L' U F U R F U L D L D F2 B U F R B2 U2 D' U D2 R2 F2 D R' F D U2 L' R' F' R F D U L2 F' L B U2 L' F' L2 U R2 L2 B R' U' L2 B D' F' L R' F' U' D' L2 D R2 U R' F2 D' L U' D2 B L2 R L2 U R' B")
     #pattern = "D2 B2 L' U D2 L2 U2 R2 B R' B2 R F' D' F2 D' L2 D2 B R' D' R2 D' U' F2 L2 B2 U2 D' U D L2"
     #45s CP V
-    pattern = "B' D2 U2 F D R B F' U2 R2 F2 R2 F2 D' L' R' L2 F' U' B F2 B' F2 R' B2 L' F' R2 U2 B' L2 D R2 F2 B F2 U D2 U' D2 L' D2 L D2 L' U F R U F' D F' R L' B2 D' B2 L2 R F2 L' B U' L R' U2 B F D L2 U L F' L2 B' U2 L2 R B U' D2 F' B F2 U R B' U' D' U2 B' R' B2 R'"
+    #pattern = "B' D2 U2 F D R B F' U2 R2 F2 R2 F2 D' L' R' L2 F' U' B F2 B' F2 R' B2 L' F' R2 U2 B' L2 D R2 F2 B F2 U D2 U' D2 L' D2 L D2 L' U F R U F' D F' R L' B2 D' B2 L2 R F2 L' B U' L R' U2 B F D L2 U L F' L2 B' U2 L2 R B U' D2 F' B F2 U R B' U' D' U2 B' R' B2 R'"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()
