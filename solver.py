@@ -74,8 +74,9 @@ def exploration(cube, allowed, func, multi=False, **kwargs):
     # print(start)
     # print(return_code)
     # print(pattern)
+    # print(" ".join(min([x.split() for x in return_code.values() if x is not None], key=len)))
 
-    return([x for x in return_code.values() if x is not None][0])
+    return(" ".join(min([x.split() for x in return_code.values() if x is not None], key=len)))
 
 # def exploration(cube, allowed, func, **kwargs):
 #     cube1 = Cube()
@@ -418,20 +419,80 @@ def allFacesSolved(cube, items=range(0,9), faces=["F", "R", "B", "L", "U", "D"])
                 return (False)
     return (True)
 
-def finalEdges(cube):
-    #diag
-    
-    #solo
+def isGoodSticker(cube):
+    good = []
+    for f in ["F", "R", "B", "L", "U", "D"]:
+        for i in range(9):
+            if cube.sides()[f].item(i) == str(f) + str(i):
+                good.append(str(f) + str(i))
+    return (good)
+
+def finalEdges(cube, done=[]):
+    stickers = isGoodSticker(cube)
+    if len(stickers) <= len(done) or len([item for item in done if item not in stickers]) != 0:
+        return (False)
+    return (True)
+
+def searchFinalEdges(cube):
+    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
+    side_oppo = {1:1, 3:5, 5:3, 7:7}
+    ud_oppo = {1:7, 3:3, 5:5, 7:1}
+    two_stickers = {
+        "U1":"B2 R2 B2 R2 B2 R2", "U5": "F2 R2 F2 R2 F2 R2", "U7": "F2 L2 F2 L2 F2 L2", "U3": "B2 L2 B2 L2 B2 L2",
+        "F1": "U2 R2 U2 R2 U2 R2", "F5": "D2 R2 D2 R2 D2 R2", "F7": "D2 L2 D2 L2 D2 L2", "F3": "U2 L2 U2 L2 U2 L2",
+        "R1": "U2 B2 U2 B2 U2 B2", "R5": "D2 B2 D2 B2 D2 B2", "R7": "D2 F2 D2 F2 D2 F2", "R3": "U2 F2 U2 F2 U2 F2"
+    }
+    one_sticker = {
+        "U1":"", "U5": "", "U7": "", "U3": "",
+        "F1":"", "F5": "", "F7": "", "F3": "",
+        "R1":"", "R5": "", "R7": "", "R3": "",
+        }
+    for f in ["F", "R"]:
+        for i, j in [(1,5), (5,7), (7,3), (3,1)]:
+            if (cube.sides()[f].item(i)[0] != f and cube.sides()[opposit[f]].item(side_oppo[i])[0] == f) and (cube.sides()[f].item(j)[0] != f and cube.sides()[opposit[f]].item(side_oppo[j])[0] == f):
+                return (two_stickers[f + str(i)])
+    for f in ["U"]:
+        for i, j in [(1,5), (5,7), (7,3), (3,1)]:
+            if (cube.sides()[f].item(i)[0] != f and cube.sides()[opposit[f]].item(ud_oppo[i])[0] == f) and (cube.sides()[f].item(j)[0] != f and cube.sides()[opposit[f]].item(ud_oppo[j])[0] == f):
+                return (two_stickers[f + str(i)])
+    return ("")
+    for f in ["F", "R"]:
+        for i in range(1, 9, 2):
+            if cube.sides()[f].item(i)[0] != f and cube.sides()[opposit[f]].item(side_oppo[i])[0] == f:
+                return (one_sticker[f + str(i)])
+    for f in ["U"]:
+        for i in range(1, 9, 2):
+            if cube.sides()[f].item(i)[0] != f and cube.sides()[opposit[f]].item(ud_oppo[i])[0] == f:
+                return (one_sticker[f + str(i)])
     return (False)
+
+def finalEdges2(cube, done=[], get=False):
+    if "F" in done and "R" in done and "U" in done:
+        return ["F", "R", "U"]
+    if not allFacesSolved(cube, items=[0,2,6,8]):
+        return (False)
+    for f in done:
+        for i in [1,3,5,7]:
+            if cube.sides()[f].item(i)[0] != f:
+                return (False)
+    good = []
+    for f in ["F", "R", "U"]:
+        for i in [1,3,5,7]:
+            if cube.sides()[f].item(i)[0] != f:
+                break
+            if i == 7:
+                good.append(f)
+    if not get and len(good) <= len(done):
+        return (False)
+    return (good)
 
 def finalSolve(cube):
     m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8])
     cube = rotate(cube, m)
-    m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], allFacesSolved, multi=True)
-    cube = rotate(cube, m)
-    #FIND PATTERN AND USE ALG TO SOLVE https://www.ryanheise.com/cube/human_thistlethwaite_algorithm.html
     while not allFacesSolved(cube):
-        m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], finalEdges)
+        while searchFinalEdges(cube) != "":
+            cube = rotate(cube, searchFinalEdges(cube))
+        m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], finalEdges2, multi=True, done=finalEdges2(cube, get=True))
         cube = rotate(cube, m)
     return (cube)
 
@@ -474,11 +535,11 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(200):
+    for i in range(2000):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
-        #print(scramble)
+        print(scramble)
         print(f"cube : {i}")
         start = time()
         s = solver(cube)

@@ -50,10 +50,8 @@
 
 
 move = "U"
-allowed = ["R", "U", "L", "D", "F2", "B2"]
+allowed = ["R U L", "U L P", "L D'", "D2 F2 L2", "F2 D'", "B2 F2"]
 
-prop = allowed
-allowed = [x for x in allowed if x != "R"]
+print(" ".join(min([x.split() for x in allowed if x is not None], key=len)))
 
 print(allowed)
-print(prop)
