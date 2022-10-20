@@ -228,6 +228,80 @@ def badEdgesOnRL(cube, nb, get=False):
 
 #---------------------------------------------------------------------------------------------------------
 
+def badEdges3(sticker, sticker2):
+    if sticker[0] == "L" or sticker[0] == "R" or ((sticker[0] == "U" or sticker[0] == "D") and (sticker2[0] == "F" or sticker2[0] == "B")):
+        return (1)
+    return (0)
+
+def eoDetection3(cube):
+    bad_edges = {}
+    #U face edges
+    bad_edges["b1"] = badEdges3(cube.face_back.item(1), cube.face_up.item(1))
+    bad_edges["b3"] = badEdges3(cube.face_back.item(3), cube.face_right.item(5))
+    bad_edges["b5"] = badEdges3(cube.face_back.item(5), cube.face_left.item(3))
+    bad_edges["b7"] = badEdges3(cube.face_back.item(7), cube.face_down.item(7))
+
+    #D face edges
+    bad_edges["f1"] = badEdges3(cube.face_front.item(1), cube.face_up.item(7))
+    bad_edges["f3"] = badEdges3(cube.face_front.item(3), cube.face_left.item(5))
+    bad_edges["f5"] = badEdges3(cube.face_front.item(5), cube.face_right.item(3))
+    bad_edges["f7"] = badEdges3(cube.face_front.item(7), cube.face_back.item(1))
+
+    #F E-slice edges
+    bad_edges["u3"] = badEdges3(cube.face_up.item(3), cube.face_left.item(1))
+    bad_edges["u5"] = badEdges3(cube.face_up.item(5), cube.face_right.item(1))
+
+    #B E-slice edges
+    bad_edges["d3"] = badEdges3(cube.face_down.item(3), cube.face_right.item(7))
+    bad_edges["d5"] = badEdges3(cube.face_down.item(5), cube.face_left.item(7))
+
+    #print(f"bad edges: {sum(bad_edges.values())}")
+    return (bad_edges)
+
+
+def edgeOrienting3(cube, bad_edges):
+    bad = [k for k, v in bad_edges.items() if v == 1]
+    if len(bad) == 0:
+        return (cube)
+
+    if bad == ['b1', 'b7', 'f1', 'f7'] or bad == ['b3', 'b5', 'f3', 'f5']:
+        cube = rotate(cube, "B")
+    if len(bad) > 2:
+        # only use <R2, U, L2, D, F, B>
+        # exploration to 4 bad edge on R or L
+        m = exploration(cube, ["R2", "U2", "L2", "D2", "F2", "B2"], badEdgesOnUD, nb=4)
+        cube = rotate(cube, m)
+        if badEdgesOnUD(cube, 4, True)[0] == 4:
+            cube = rotate(cube, "U")
+        else:
+            cube = rotate(cube, "D")
+    else:
+        # only use <R2, U, L2, D, F, B>
+        # exploration to 1 bad edges on U or D
+        m = exploration(cube, ["R2", "U2", "L2", "D2", "F2", "B2"], badEdgesOnUD, nb=1)
+        cube = rotate(cube, m)
+        if badEdgesOnUD(cube, 1, True)[0] == 1:
+            cube = rotate(cube, "U")
+        else:
+            cube = rotate(cube, "D")
+    return (cube)
+
+def badEdgesOnUD(cube, nb, get=False):
+    bad_edges = eoDetection3(cube)
+    bad = [k for k, v in bad_edges.items() if v == 1]
+    u = [k[0] for k in bad].count("u") + bad_edges["b1"] + bad_edges["f1"]
+    d = [k[0] for k in bad].count("d") + bad_edges["b7"] + bad_edges["f7"]
+    if get:
+        return ((u, d))
+    else:
+        if u == nb or d == nb:
+            return (True)
+    return (False)
+
+
+
+
+#*******************************************************************************************************
 
 def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
     for i in items:
@@ -237,6 +311,33 @@ def isUDColor(cube, items=[0, 1, 2, 3, 4, 5, 6, 7, 8]):
         if cube.face_down.item(i)[0] != 'U' and cube.face_down.item(i)[0] != 'D':
             return(False)
     return (True)
+
+def isGoodColor(color, f, oppos=True):
+    opposit = {"F" : "B", "R": "L", "U": "D", "B": "F", "L": "R", "D": "U"}
+    if color == f:
+        return (True)
+    elif oppos == True and color == opposit[f]:
+        return (True)
+    return (False)
+
+def allFacesColor(cube, items=range(0,9)):
+    for f in ["F", "R", "B", "L", "U", "D"]:
+        for i in items:
+            if isGoodColor(f, cube.sides()[f].item(i)[0], oppos=True) == False:
+                return (False)
+    return (True)
+
+def twoAxisEO(cube):
+    bad_edges = eoDetection(cube)
+    while sum(bad_edges.values()) > 0:
+        cube = edgeOrienting(cube ,bad_edges)
+        bad_edges = eoDetection(cube)
+    if isUDColor(cube, [1, 3, 5, 7]) == False:
+        bad_edges = eoDetection2(cube)
+        while sum(bad_edges.values()) > 0:
+            cube = edgeOrienting2(cube ,bad_edges)
+            bad_edges = eoDetection2(cube)
+    return (cube)
 
 
 def tweakCOAlgo(algo: str, face_up):
@@ -287,7 +388,8 @@ def whichTrigger(cube):
     l_face = {"F": "L", "L": "B", "B": "R", "R": "F"}
     r_face = {"F": "R", "R": "B", "B": "L", "L": "F"}
     ud = ["U", "D"]
-    for f in ["F", "R", "B", "L"]:
+    faces = ["F", "R", "B", "L"]
+    for f in faces:
         #4c
         if cube.sides()[f].item(0)[0] in ud and cube.sides()[f].item(2)[0] in ud and cube.sides()[f].item(6)[0] in ud and cube.sides()[l_face[f]].item(0)[0] in ud:
             return (tweakDRTrigger(tweakDRTrigger("R U' R' U2 R U' R", "L"), f))
@@ -347,28 +449,44 @@ def UDCornersOrientation(cube):
         cube = rotate(cube, whichTrigger(cube))
     return (cube)
 
+def allFacesSolved(cube, items=range(0,9), faces=["F", "R", "B", "L", "U", "D"]):
+    for f in faces:
+        for i in items:
+            if cube.sides()[f].item(i)[0] != f:
+                return (False)
+    return (True)
+
+
+
+def cornerPlacement(cube):
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8], faces=["U", "D"])
+    cube = rotate(cube, m)
+    bad_edges = eoDetection3(cube)
+    while sum(bad_edges.values()) > 0:
+        cube = edgeOrienting3(cube ,bad_edges)
+        bad_edges = eoDetection3(cube)
+    return (cube)
 
 
 def solver(cube):
     global pattern
     pattern = []
     # Step 1 + 2.1
-    #while isUDColor(cube, [1, 3, 5, 7]) == False:
-    bad_edges = eoDetection(cube)
-    while sum(bad_edges.values()) > 0:
-        cube = edgeOrienting(cube ,bad_edges)
-        bad_edges = eoDetection(cube)
-    if isUDColor(cube, [1, 3, 5, 7]) == False:
-        bad_edges = eoDetection2(cube)
-        while sum(bad_edges.values()) > 0:
-            cube = edgeOrienting2(cube ,bad_edges)
-            bad_edges = eoDetection2(cube)
+    cube = twoAxisEO(cube)
     print("2 axis EO done")
     # Step 2.2
     cube = UDCornersOrientation(cube)
     print("CO done")
     # Step 3.1
-    
+    cube = cornerPlacement(cube)
+    print("CP done")
+
+
+    # #3 axis EO -> double DR -> HTR
+    # bad_edges = eoDetection3(cube)
+    # while sum(bad_edges.values()) > 0:
+    #     cube = edgeOrienting3(cube ,bad_edges)
+    #     bad_edges = eoDetection3(cube)
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint, random
@@ -382,11 +500,11 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(2000):
+    for i in range(200):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
-        print(scramble)
+        #print(scramble)
         print(f"cube : {i}")
         start = time()
         s = solver(cube)

@@ -516,13 +516,13 @@ def solver(cube):
     print("CO done")
     # Step 3.1
     #NOT GOOD FROM HERE
-    #cube = cornerPlacement(cube)
+    cube = cornerPlacement(cube)
     print("CP done")
     # Step 3.2
-    #cube = edgePlacement(cube)
+    cube = edgePlacement(cube)
     print("EP done")
     # Step 4
-    #cube = finalSolve(cube)
+    cube = finalSolve(cube)
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint, random
