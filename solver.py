@@ -536,7 +536,7 @@ def main():
 
     timer = {}
     soluce = {}
-    for i in range(2000):
+    for i in range(100):
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)

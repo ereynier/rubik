@@ -264,11 +264,9 @@ def edgeOrienting3(cube, bad_edges):
     if len(bad) == 0:
         return (cube)
 
-    if bad == ['b1', 'b7', 'f1', 'f7'] or bad == ['b3', 'b5', 'f3', 'f5']:
-        cube = rotate(cube, "B")
+    # if bad == ['b1', 'b7', 'f1', 'f7'] or bad == ['b3', 'b5', 'f3', 'f5']:
+    #     cube = rotate(cube, "B")
     if len(bad) > 2:
-        # only use <R2, U, L2, D, F, B>
-        # exploration to 4 bad edge on R or L
         m = exploration(cube, ["R2", "U2", "L2", "D2", "F2", "B2"], badEdgesOnUD, nb=4)
         cube = rotate(cube, m)
         if badEdgesOnUD(cube, 4, True)[0] == 4:
@@ -276,8 +274,6 @@ def edgeOrienting3(cube, bad_edges):
         else:
             cube = rotate(cube, "D")
     else:
-        # only use <R2, U, L2, D, F, B>
-        # exploration to 1 bad edges on U or D
         m = exploration(cube, ["R2", "U2", "L2", "D2", "F2", "B2"], badEdgesOnUD, nb=1)
         cube = rotate(cube, m)
         if badEdgesOnUD(cube, 1, True)[0] == 1:
@@ -388,6 +384,8 @@ def whichTrigger(cube):
     l_face = {"F": "L", "L": "B", "B": "R", "R": "F"}
     r_face = {"F": "R", "R": "B", "B": "L", "L": "F"}
     ud = ["U", "D"]
+    u = ["U"]
+    d = ["D"]
     faces = ["F", "R", "B", "L"]
     for f in faces:
         #4c
@@ -458,15 +456,64 @@ def allFacesSolved(cube, items=range(0,9), faces=["F", "R", "B", "L", "U", "D"])
 
 
 
-def cornerPlacement(cube):
-    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8], faces=["U", "D"])
-    cube = rotate(cube, m)
+def matchMismatchCount(cube):
+    if not allFacesSolved(cube, items=[0,2,6,8], faces=["U", "D"]):
+        return (0, 0)
+    match = 0
+    mismatch = 0
+    for f in ["F", "L", "B", "R"]:
+        if (cube.sides()[f].item(0)[0] == cube.sides()[f].item(2)[0]):
+            match += 1
+        if (cube.sides()[f].item(6)[0] == cube.sides()[f].item(8)[0]):
+            match += 1
+    for f in ["F", "L", "B", "R"]:
+        if (cube.sides()[f].item(0)[0] != cube.sides()[f].item(2)[0]):
+            mismatch += 1
+        if (cube.sides()[f].item(6)[0] != cube.sides()[f].item(8)[0]):
+            mismatch += 1
+    return(match, mismatch)
+
+def misMatch(cube):
+    test_cube = Cube()
+    lowest = min(matchMismatchCount(cube))
+    alg = ""
+    for m in ["R' F R' B2 R F' R", "L' F L' B2 L F' L", "B' R B' L2 B R' B", "B' L B' R2 B L' B", "L' B L' F2 L B' L", "R' B R' F2 R B' R", "F' L F' R2 F L' F", "F' R F' L2 F R' F"]: 
+        test_cube.copy(cube)
+        test_cube = rotate(test_cube, m, save=False)
+        match, mismatch = matchMismatchCount(test_cube)
+        if (match, mismatch) != (0, 0) and (match < lowest or mismatch < lowest):
+            alg = m
+    if alg != "":
+        return (alg)
+    return (False)
+
+
+
+
+def threeAxisEO(cube):
+    # m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8], faces=["U", "D"])
+    # cube = rotate(cube, m)
+
+    # while not 8 in matchMismatchCount(cube):
+    #     m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], misMatch)
+    #     cube = rotate(cube, m)
+    #     cube = rotate(cube, misMatch(cube))
+
+
     bad_edges = eoDetection3(cube)
     while sum(bad_edges.values()) > 0:
         cube = edgeOrienting3(cube ,bad_edges)
         bad_edges = eoDetection3(cube)
+    
     return (cube)
 
+
+def FBCornersOrientation(cube):
+    cube = rotate(cube, "F R' F L2 F' R F")
+    return (cube)
+
+def finalSolve(cube):
+    return (cube)
 
 def solver(cube):
     global pattern
@@ -478,15 +525,15 @@ def solver(cube):
     cube = UDCornersOrientation(cube)
     print("CO done")
     # Step 3.1
-    cube = cornerPlacement(cube)
-    print("CP done")
+    #3 axis EO -> double DR = HTR
+    cube = threeAxisEO(cube)
+    print("3 axis EO done")
+    cube = FBCornersOrientation(cube)
+    print("HTR done")
+    #Step 4
+    cube = finalSolve(cube)
 
 
-    # #3 axis EO -> double DR -> HTR
-    # bad_edges = eoDetection3(cube)
-    # while sum(bad_edges.values()) > 0:
-    #     cube = edgeOrienting3(cube ,bad_edges)
-    #     bad_edges = eoDetection3(cube)
     return (cube.reducePattern(" ".join(pattern)))
 
 from random import randint, random

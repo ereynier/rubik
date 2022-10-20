@@ -34,7 +34,7 @@ def main():
     #99 move V
     #pattern = "D' U' F L R U F L2 R' B2 F' L' R F2 D' B R2 U2 F U2 B2 F' B' F' B U' R' U2 F2 U2 D' R' L R' L F' L' B2 U R D2 F U D R2 F' R F U2 L2 U B U' R F L' B2 F2 U R F2 L' R2 B D B' R2 B D' L2 D2 B2 F' U2 D2 L' B D L2 R D' B' U2 L B2 F2 U R B' D' U F2 D2 B2 R U2 D' R L F2 B' R F2 L D B U2 L' B' U' L' D2 R2 U2 D' L2 B' R2 F L' F' R"
     # 104 moves V
-    #pattern = "R' L2 D2 R' B2 U F2 U L2 R' U' R2 L2 D' U' R' B2 L F R F D U D2 U2 L F R2 F2 R' D2 L2 D' F2 L2 B2 F' B R2 L' R2 U' B2 L U' L2 B' R2 F' D' B' L2 R F U2 D F' B F' U2 B R U' B' F' B' L' D2 U' R' U' D B2 F' U' D' L F2 D' L' B2 U' L2 D2 B' D B2 L2 B F' R2 L B2 R' D' B2 L2 D B' U D' B2 U2 L2 B L2 U F2 R2 B L' D L' B U R2 B2 D' R' L D' B' R' L' R B' R2 L B' R' D2 L2 B2 L' U' L D2 U2 L B D2 L2 R"
+    pattern = "R' L2 D2 R' B2 U F2 U L2 R' U' R2 L2 D' U' R' B2 L F R F D U D2 U2 L F R2 F2 R' D2 L2 D' F2 L2 B2 F' B R2 L' R2 U' B2 L U' L2 B' R2 F' D' B' L2 R F U2 D F' B F' U2 B R U' B' F' B' L' D2 U' R' U' D B2 F' U' D' L F2 D' L' B2 U' L2 D2 B' D B2 L2 B F' R2 L B2 R' D' B2 L2 D B' U D' B2 U2 L2 B L2 U F2 R2 B L' D L' B U R2 B2 D' R' L D' B' R' L' R B' R2 L B' R' D2 L2 B2 L' U' L D2 U2 L B D2 L2 R"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()
