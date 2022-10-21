@@ -316,10 +316,10 @@ def isGoodColor(color, f, oppos=True):
         return (True)
     return (False)
 
-def allFacesColor(cube, items=range(0,9)):
-    for f in ["F", "R", "B", "L", "U", "D"]:
+def allFacesColor(cube, items=range(0,9), faces=["F", "R", "B", "L", "U", "D"]):
+    for f in faces:
         for i in items:
-            if isGoodColor(f, cube.sides()[f].item(i)[0], oppos=True) == False:
+            if not isGoodColor(f, cube.sides()[f].item(i)[0], oppos=True):
                 return (False)
     return (True)
 
@@ -489,17 +489,21 @@ def misMatch(cube):
 
 
 
+def cornerPlacement(cube):
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8], faces=["U", "D"])
+    cube = rotate(cube, m)
+
+    while not 8 in matchMismatchCount(cube):
+        m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], misMatch)
+        cube = rotate(cube, m)
+        cube = rotate(cube, misMatch(cube))
+
+    m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8])
+    cube = rotate(cube, m)
+    return (cube)
+
 
 def threeAxisEO(cube):
-    # m = exploration(cube, ["U","D","F2","B2","R2","L2"], allFacesSolved, multi=True, items=[0, 2, 6, 8], faces=["U", "D"])
-    # cube = rotate(cube, m)
-
-    # while not 8 in matchMismatchCount(cube):
-    #     m = exploration(cube, ["U2","D2","F2","B2","R2","L2"], misMatch)
-    #     cube = rotate(cube, m)
-    #     cube = rotate(cube, misMatch(cube))
-
-
     bad_edges = eoDetection3(cube)
     while sum(bad_edges.values()) > 0:
         cube = edgeOrienting3(cube ,bad_edges)
@@ -507,12 +511,65 @@ def threeAxisEO(cube):
     
     return (cube)
 
+def tweakDRTrigger2(algo):
+    new_algs = []
+    new_algs.append(algo.replace("U", "tempU").replace("B", "U").replace("D", "B").replace("F", "D").replace("tempU", "F"))
+    #faces
+    new_algs.append(algo.replace("D", "tempD").replace("L", "D").replace("U", "L").replace("R", "U").replace("tempD", "R"))
+    new_algs.append(algo.replace("D", "tempD").replace("U", "D").replace("tempD", "U").replace("L", "tempL").replace("R", "L").replace("tempL", "R"))
+    new_algs.append(algo.replace("D", "tempD").replace("R", "D").replace("U", "R").replace("L", "U").replace("tempD", "L"))
+    #mirror
+    mirror = []
+    for alg in new_algs:
+        mirror.append(mirrorTweakDRTrigger(alg, "R"))
+        mirror.append(mirrorTweakDRTrigger(alg, "U"))
+    new_algs = new_algs + mirror
+    return (new_algs)
 
-def FBCornersOrientation(cube):
-    cube = rotate(cube, "F R' F L2 F' R F")
+
+def countBadCorner2(cube, faces=["U", "R", "D", "L", "F", "B"]):
+    bad = 0
+    for f in faces:
+        for i in range(0,9):
+            if not isGoodColor(f, cube.sides()[f].item(i)[0]):
+                bad += 1
+    return (bad)
+
+def whichTrigger2(cube, bad):
+    cube1 = Cube()
+    min_alg= ""
+    algs = ['R U R', "R U' R", "R' U' R F2 U R", 'R U2 R', 'L F2 L', "L' R U R' U' L", "L' U R U' R' L", "R U R' U' R U2 R", "R' F2 D' F2 R", "L F2 L' U R U2 R", 'R', 'F2 R', 'F2 U2 R', 'F2 U R', "L2 U' R", "F2 U' R'", 'R2 U R', 'R2 F2 R', 'R2 U2 R', 'F2 B2 R', "L2 U' D R", 'F2 U2 D2 R', 'F2 U D2 R', 'F2 U2 D R', 'R2 F2 U2 R', 'F2 U D R', 'L2 F2 U R', 'F2 L2 U R', 'R2 F2 U R', "F2 L2 U' R", "R2 F2 U' R", "F2 R2 U' R", "L2 F2 U' R", 'F2 R2 U R', 'L2 U2 F2 R', 'F2 R2 U2 R', 'R2 U F2 R', "F2 U' F2 R", "R2 U' F2 R", 'B2 U F2 R', 'L2 U F2 R', "B2 U' F2 R", "L2 U' F2 R", 'F2 U F2 R', 'R2 L2 U R', 'F2 U2 F2 R', 'R U2 F2 R', "R' U2 F2 R", "L U' F2 U' D' L", "L' U R U' L", "L' U L R U' R", "R' F2 R2 U2 R", "R' D' F2 D R", "L U' R U L' U R", "L' U2 R U R' U2 L", "L' U2 R U2 R' U2 L", "B' U R U' R' U' B", "L R U' R' U L", "R' U' F2 U R", "R' D F2 D' R", "R U' R2 D R", "R' D R2 U' R'", "R' U F2 U2 R2 D R'", "U L' U R2 U' L", "U R' D L2 D' R", "R U' R2 D R2 U R", "R2 D' R' U L2 U' R", "R D L2 D' R", "R D R2 U' R", "R U' D R' U D' R", "R' U' F2 U F2 R", "R U' R' U2 R U' R", "R F2 U2 F2 R", "R' D' R L' U L", 'R U2 L', 'R F2 U R', "R' U2 R' U2 R", "R' U2 R U2 R", "R U2 R' U2 R", 'R U2 R U2 R', "R' U' R' U R", "R' U' R U R", "R' U R' U' R", "R' U R U' R", "R U' R' U R", "R U' R U R", "R U R' U' R", "R U R U' R", "R' U' R' U' R", "R' U R U R", "R U' R' U' R", 'R U R U R', "R' U' R2 U R", "R' U R2 U' R", "R' U2 R2 U2 R", "R U' R2 U R", "R U R2 U' R", 'R U2 R2 U2 R', "R' U' R' U2 R", "R' U R U2 R", "R' U2 R' U' R", "R' U2 R U R", "R U' R' U2 R", 'R U R U2 R', "R U2 R' U' R", 'R U2 R U R', "R' U' R U2 R", "R' U R' U2 R", "R' U2 R' U R", "R' U2 R U' R", "R U' R U2 R", "R U R' U2 R", "R U2 R' U R", "R U2 R U' R", "R' U' R2 U' R", "R' U R2 U R", "R U' R2 U' R", 'R U R2 U R', "R' U' R U' R", "R' U' R2 U2 R", "R' U R' U R", "R' U R2 U2 R", "R' U2 R2 U' R", "R' U2 R2 U R", "R U' R U' R", "R U' R2 U2 R", "R U R' U R", 'R U R2 U2 R', "R U2 R2 U' R", 'R U2 R2 U R']
+    for alg in algs:
+        for m in tweakDRTrigger2(alg):
+            # m_split = m.split()
+            # if "F'" in m_split or "L'" in m_split or "F" in m_split or "L" in m_split:
+            #     break
+            cube1.copy(cube)
+            cube1 = rotate(cube1, m, save=False)
+            if countBadCorner2(cube1) < bad:
+                min_alg = m
+                bad = countBadCorner2(cube1)
+    if min_alg != "":
+        return (min_alg)
+    return (None)
+
+def knownDRTrigger2(cube, bad):
+    if whichTrigger2(cube, bad) != None:
+        return (True)
+    return (False)
+
+def doubleDR(cube):
+    while allFacesColor(cube) == False:
+        # m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger2, multi=True, bad=countBadCorner2(cube))
+        # cube = rotate(cube, m)
+        cube = rotate(cube, whichTrigger2(cube, countBadCorner2(cube)))
+        
+
     return (cube)
 
+
 def finalSolve(cube):
+
     return (cube)
 
 def solver(cube):
@@ -524,12 +581,15 @@ def solver(cube):
     # Step 2.2
     cube = UDCornersOrientation(cube)
     print("CO done")
+    # Step 2.3
+    # cube = cornerPlacement(cube)
+    # print("CP done")
     # Step 3.1
     #3 axis EO -> double DR = HTR
-    cube = threeAxisEO(cube)
-    print("3 axis EO done")
-    cube = FBCornersOrientation(cube)
-    print("HTR done")
+    # cube = threeAxisEO(cube)
+    # print("3 axis EO done")
+    # cube = doubleDR(cube)
+    # print("HTR done")
     #Step 4
     cube = finalSolve(cube)
 

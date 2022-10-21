@@ -49,9 +49,9 @@
 #     search()
 
 
-move = "U"
-allowed = ["R U L", "U L P", "L D'", "D2 F2 L2", "F2 D'", "B2 F2"]
-
-print(" ".join(min([x.split() for x in allowed if x is not None], key=len)))
-
-print(allowed)
+with open("./img/DRTrigger.txt") as f:
+    txt = f.read()
+    dr= txt.split("\n")
+    d = [x.strip() for x in dr if x != ""]
+    
+    print(d)
