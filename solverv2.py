@@ -373,11 +373,12 @@ def mirrorTweakDRTrigger(algo, mirror):
         new_algo = m_algo.replace('R', 'tempR').replace('L', 'R').replace('tempR', 'L')
     return (new_algo)
 
-def countBadCorner(cube, f):
+def countBadCorner(cube, faces=["F", "B", "R", "L", "U", "D"]):
     bad = 0
-    for i in [0, 2, 6, 8]:
-        if cube.sides()[f].item(i)[0] == "D" or cube.sides()[f].item(i)[0] == "U":
-            bad += 1
+    for f in faces:
+        for i in [0, 2, 6, 8]:
+            if not isGoodColor(cube.sides()[f].item(i)[0], f):
+                bad += 1
     return (bad)
 
 def whichTrigger(cube):
@@ -436,7 +437,7 @@ def knownDRTrigger(cube):
         return (True)
     return (False)
 
-def UDCornersOrientation(cube):
+def firstDR(cube):
     while isUDColor(cube) == False:
         # bad = 0
         # for f in ["F", "R", "B", "L"]:
@@ -508,7 +509,6 @@ def threeAxisEO(cube):
     while sum(bad_edges.values()) > 0:
         cube = edgeOrienting3(cube ,bad_edges)
         bad_edges = eoDetection3(cube)
-    
     return (cube)
 
 def tweakDRTrigger2(algo):
@@ -541,9 +541,9 @@ def whichTrigger2(cube, bad):
     algs = ['R U R', "R U' R", "R' U' R F2 U R", 'R U2 R', 'L F2 L', "L' R U R' U' L", "L' U R U' R' L", "R U R' U' R U2 R", "R' F2 D' F2 R", "L F2 L' U R U2 R", 'R', 'F2 R', 'F2 U2 R', 'F2 U R', "L2 U' R", "F2 U' R'", 'R2 U R', 'R2 F2 R', 'R2 U2 R', 'F2 B2 R', "L2 U' D R", 'F2 U2 D2 R', 'F2 U D2 R', 'F2 U2 D R', 'R2 F2 U2 R', 'F2 U D R', 'L2 F2 U R', 'F2 L2 U R', 'R2 F2 U R', "F2 L2 U' R", "R2 F2 U' R", "F2 R2 U' R", "L2 F2 U' R", 'F2 R2 U R', 'L2 U2 F2 R', 'F2 R2 U2 R', 'R2 U F2 R', "F2 U' F2 R", "R2 U' F2 R", 'B2 U F2 R', 'L2 U F2 R', "B2 U' F2 R", "L2 U' F2 R", 'F2 U F2 R', 'R2 L2 U R', 'F2 U2 F2 R', 'R U2 F2 R', "R' U2 F2 R", "L U' F2 U' D' L", "L' U R U' L", "L' U L R U' R", "R' F2 R2 U2 R", "R' D' F2 D R", "L U' R U L' U R", "L' U2 R U R' U2 L", "L' U2 R U2 R' U2 L", "B' U R U' R' U' B", "L R U' R' U L", "R' U' F2 U R", "R' D F2 D' R", "R U' R2 D R", "R' D R2 U' R'", "R' U F2 U2 R2 D R'", "U L' U R2 U' L", "U R' D L2 D' R", "R U' R2 D R2 U R", "R2 D' R' U L2 U' R", "R D L2 D' R", "R D R2 U' R", "R U' D R' U D' R", "R' U' F2 U F2 R", "R U' R' U2 R U' R", "R F2 U2 F2 R", "R' D' R L' U L", 'R U2 L', 'R F2 U R', "R' U2 R' U2 R", "R' U2 R U2 R", "R U2 R' U2 R", 'R U2 R U2 R', "R' U' R' U R", "R' U' R U R", "R' U R' U' R", "R' U R U' R", "R U' R' U R", "R U' R U R", "R U R' U' R", "R U R U' R", "R' U' R' U' R", "R' U R U R", "R U' R' U' R", 'R U R U R', "R' U' R2 U R", "R' U R2 U' R", "R' U2 R2 U2 R", "R U' R2 U R", "R U R2 U' R", 'R U2 R2 U2 R', "R' U' R' U2 R", "R' U R U2 R", "R' U2 R' U' R", "R' U2 R U R", "R U' R' U2 R", 'R U R U2 R', "R U2 R' U' R", 'R U2 R U R', "R' U' R U2 R", "R' U R' U2 R", "R' U2 R' U R", "R' U2 R U' R", "R U' R U2 R", "R U R' U2 R", "R U2 R' U R", "R U2 R U' R", "R' U' R2 U' R", "R' U R2 U R", "R U' R2 U' R", 'R U R2 U R', "R' U' R U' R", "R' U' R2 U2 R", "R' U R' U R", "R' U R2 U2 R", "R' U2 R2 U' R", "R' U2 R2 U R", "R U' R U' R", "R U' R2 U2 R", "R U R' U R", 'R U R2 U2 R', "R U2 R2 U' R", 'R U2 R2 U R']
     for alg in algs:
         for m in tweakDRTrigger2(alg):
-            # m_split = m.split()
-            # if "F'" in m_split or "L'" in m_split or "F" in m_split or "L" in m_split:
-            #     break
+            m_split = m.split()
+            if "F'" in m_split or "L'" in m_split or "F" in m_split or "L" in m_split or "B'" in m_split or "R'" in m_split or "B" in m_split or "R" in m_split:
+                break
             cube1.copy(cube)
             cube1 = rotate(cube1, m, save=False)
             if countBadCorner2(cube1) < bad:
@@ -560,8 +560,8 @@ def knownDRTrigger2(cube, bad):
 
 def doubleDR(cube):
     while allFacesColor(cube) == False:
-        # m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger2, multi=True, bad=countBadCorner2(cube))
-        # cube = rotate(cube, m)
+        m = exploration(cube, ["U","D","F2","B2","R2","L2"], knownDRTrigger2, multi=True, bad=countBadCorner2(cube))
+        cube = rotate(cube, m)
         cube = rotate(cube, whichTrigger2(cube, countBadCorner2(cube)))
         
 
@@ -579,7 +579,7 @@ def solver(cube):
     cube = twoAxisEO(cube)
     print("2 axis EO done")
     # Step 2.2
-    cube = UDCornersOrientation(cube)
+    cube = firstDR(cube)
     print("CO done")
     # Step 2.3
     # cube = cornerPlacement(cube)
@@ -611,7 +611,7 @@ def main():
         cube.reset()
         scramble = cube.reducePattern(cube.random(randint(20, 200)))
         cube.scramble(scramble)
-        #print(scramble)
+        print(scramble)
         print(f"cube : {i}")
         start = time()
         s = solver(cube)

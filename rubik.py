@@ -32,9 +32,9 @@ def main():
     #pattern = "B2 R' B' F2 U2 F' R F' B F2 L2 U2 B' U' R2 B2 F' L' R2 B' U2 R B2 F L2 B' F' B' F B F D R' L' D L' D' B' L F R' B2 F L2 R F R2 F B' L' R B U2 D' R' B L B D' R2 F' U2 D B' U' L2 R2 U' L D2 F2 U' B U B2 L' U' L' D2 U2 F L2 D' B F2 B2 L D F' L' R2 F2 D' U2 L2 R B D F' U F L D' U' R' D U R' L' D F' U' F R B' L2 R F2 B L2 B' U' F D2 R2 B' D' B' L2 R' D B' R'"
     #pattern = "R2 B' L' D' B' R' D R2 D2 L2 U2 R U2 R' B2 L' F B2 L U' L2 R2 D F D' F' R2 B F L2 D R' F R' U2 L2 U' L2 B' D U' L' U' L' R2 L B F' B U2 F B2 F U2 L2 U' B' R' L B' D B' U2 L U2 F' D2 B D L2 F2 U2 F U' D2 F2 D2 F2 L F D' B' D' B' U B2 R2 L2 D F' D2 F D' B' D2 L R' L R2 F R' F' D' R' D F' U2 L R2 F U D' R2 D2 U F' R F' R F R2 U"
     #99 move V
-    pattern = "D' U' F L R U F L2 R' B2 F' L' R F2 D' B R2 U2 F U2 B2 F' B' F' B U' R' U2 F2 U2 D' R' L R' L F' L' B2 U R D2 F U D R2 F' R F U2 L2 U B U' R F L' B2 F2 U R F2 L' R2 B D B' R2 B D' L2 D2 B2 F' U2 D2 L' B D L2 R D' B' U2 L B2 F2 U R B' D' U F2 D2 B2 R U2 D' R L F2 B' R F2 L D B U2 L' B' U' L' D2 R2 U2 D' L2 B' R2 F L' F' R"
+    #pattern = "D' U' F L R U F L2 R' B2 F' L' R F2 D' B R2 U2 F U2 B2 F' B' F' B U' R' U2 F2 U2 D' R' L R' L F' L' B2 U R D2 F U D R2 F' R F U2 L2 U B U' R F L' B2 F2 U R F2 L' R2 B D B' R2 B D' L2 D2 B2 F' U2 D2 L' B D L2 R D' B' U2 L B2 F2 U R B' D' U F2 D2 B2 R U2 D' R L F2 B' R F2 L D B U2 L' B' U' L' D2 R2 U2 D' L2 B' R2 F L' F' R"
     # 104 moves V
-    #pattern = "R' L2 D2 R' B2 U F2 U L2 R' U' R2 L2 D' U' R' B2 L F R F D U D2 U2 L F R2 F2 R' D2 L2 D' F2 L2 B2 F' B R2 L' R2 U' B2 L U' L2 B' R2 F' D' B' L2 R F U2 D F' B F' U2 B R U' B' F' B' L' D2 U' R' U' D B2 F' U' D' L F2 D' L' B2 U' L2 D2 B' D B2 L2 B F' R2 L B2 R' D' B2 L2 D B' U D' B2 U2 L2 B L2 U F2 R2 B L' D L' B U R2 B2 D' R' L D' B' R' L' R B' R2 L B' R' D2 L2 B2 L' U' L D2 U2 L B D2 L2 R"
+    pattern = "R' L2 D2 R' B2 U F2 U L2 R' U' R2 L2 D' U' R' B2 L F R F D U D2 U2 L F R2 F2 R' D2 L2 D' F2 L2 B2 F' B R2 L' R2 U' B2 L U' L2 B' R2 F' D' B' L2 R F U2 D F' B F' U2 B R U' B' F' B' L' D2 U' R' U' D B2 F' U' D' L F2 D' L' B2 U' L2 D2 B' D B2 L2 B F' R2 L B2 R' D' B2 L2 D B' U D' B2 U2 L2 B L2 U F2 R2 B L' D L' B U R2 B2 D' R' L D' B' R' L' R B' R2 L B' R' D2 L2 B2 L' U' L D2 U2 L B D2 L2 R"
     print(pattern)
     cube.scramble(pattern)
     start = time.time()
